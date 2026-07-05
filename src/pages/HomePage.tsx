@@ -18,17 +18,20 @@ function ProjectCard({ proj, i }: { proj: ReturnType<typeof usePortfolio>['data'
     <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: i * 0.12 }}
       whileHover={{ y: -8, borderColor: 'rgba(255,128,74,0.3)' }}
       style={{ display: 'flex', flexDirection: 'column', borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden', transition: 'border-color 0.3s ease' }}>
-      <div style={{ margin: 20, minHeight: 380, borderRadius: 16, background: 'rgb(6,8,14)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+      <div style={{ margin: 20, minHeight: proj.imageUrl ? 'auto' : 400, borderRadius: 16, background: 'rgb(6,8,14)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
         {proj.imageUrl ? (
-          <img src={proj.imageUrl} alt={proj.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={proj.imageUrl} alt={proj.name} style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
         ) : (
-          <motion.span style={{ y: ghostY, fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(28px,4vw,44px)', color: 'rgba(255,255,255,0.14)', userSelect: 'none', position: 'relative', zIndex: 10 }}>
-            {proj.name}
-          </motion.span>
+          <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(28px,4vw,44px)', color: 'rgba(255,255,255,0.14)', userSelect: 'none' }}>
+            Placeholder
+          </span>
         )}
       </div>
       <div style={{ padding: '0 32px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 600, fontSize: 'clamp(20px,2.4vw,26px)', lineHeight: 1.3, color: '#fff', maxWidth: 560 }}>{proj.headline}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 600, fontSize: 13, letterSpacing: '0.1em', color: ACCENT, textTransform: 'uppercase' }}>{proj.name}</span>
+          <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 600, fontSize: 'clamp(20px,2.4vw,26px)', lineHeight: 1.3, color: '#fff', maxWidth: 560 }}>{proj.headline}</span>
+        </div>
         <div style={{ display: 'flex', flexDirection: 'row', gap: 48, flexWrap: 'wrap' }}>
           {proj.stats.map((s, si) => (
             <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
