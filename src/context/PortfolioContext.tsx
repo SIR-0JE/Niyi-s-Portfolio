@@ -298,8 +298,9 @@ interface CtxType {
   set: (patch: Partial<PortfolioContent>) => void
   setNested: <K extends keyof PortfolioContent>(key: K, val: PortfolioContent[K]) => void
   reset: () => void
-  /** 'idle' | 'saving' | 'saved' | 'error' */
-  syncStatus: 'idle' | 'saving' | 'saved' | 'error'
+  /** 'idle' | 'saving' | 'saved' | 'error' | 'unsaved' */
+  syncStatus: 'idle' | 'saving' | 'saved' | 'error' | 'unsaved'
+  pushToCloud: () => Promise<void>
 }
 
 const Ctx = createContext<CtxType | undefined>(undefined)
@@ -329,7 +330,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     })
   }, [])
 
-  // ── 3. Whenever data changes (after first mount): save to both places ──
+  // ── 3. Whenever data changes (after first mount): save to LocalStorage ONLY ──
   useEffect(() => {
     if (isFirstMount.current) { isFirstMount.current = false; return }
 
@@ -341,15 +342,17 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       alert('Image may be too large for storage. Try a smaller image.')
     }
 
-    // Debounce Supabase write by 1.5s to avoid hammering the DB while typing
-    if (saveTimer.current) clearTimeout(saveTimer.current)
+    // Mark as unsaved so admin knows to push
+    if (syncStatus !== 'unsaved' && syncStatus !== 'saving') {
+      setSyncStatus('unsaved')
+    }
+  }, [data])
+
+  const pushToCloud = useCallback(async () => {
     setSyncStatus('saving')
-    saveTimer.current = setTimeout(async () => {
-      const ok = await savePortfolio(data)
-      setSyncStatus(ok ? 'saved' : 'error')
-      // Reset status badge after 3s
-      setTimeout(() => setSyncStatus('idle'), 3000)
-    }, 1500)
+    const ok = await savePortfolio(data)
+    setSyncStatus(ok ? 'saved' : 'error')
+    if (ok) setTimeout(() => setSyncStatus('idle'), 3000)
   }, [data])
 
   const set = useCallback((patch: Partial<PortfolioContent>) =>
@@ -360,7 +363,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const reset = useCallback(() => setData(DEFAULT), [])
 
-  return <Ctx.Provider value={{ data, set, setNested, reset, syncStatus }}>{children}</Ctx.Provider>
+  return <Ctx.Provider value={{ data, set, setNested, reset, syncStatus, pushToCloud }}>{children}</Ctx.Provider>
 }
 
 export const usePortfolio = () => {

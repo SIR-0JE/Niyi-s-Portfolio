@@ -16,12 +16,16 @@ function ProjectCard({ proj, i }: { proj: ReturnType<typeof usePortfolio>['data'
   const ghostY = useTransform(scrollYProgress, [0, 1], [24, -24])
   return (
     <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: i * 0.12 }}
-      style={{ display: 'flex', flexDirection: 'column', borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-      <div style={{ margin: 20, minHeight: 260, borderRadius: 16, background: 'rgb(6,8,14)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
-        {proj.imageUrl && <img src={proj.imageUrl} alt={proj.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />}
-        <motion.span style={{ y: ghostY, fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(28px,4vw,44px)', color: 'rgba(255,255,255,0.14)', userSelect: 'none', position: 'relative', zIndex: 10 }}>
-          {proj.name}
-        </motion.span>
+      whileHover={{ y: -8, borderColor: 'rgba(255,128,74,0.3)' }}
+      style={{ display: 'flex', flexDirection: 'column', borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden', transition: 'border-color 0.3s ease' }}>
+      <div style={{ margin: 20, minHeight: 380, borderRadius: 16, background: 'rgb(6,8,14)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+        {proj.imageUrl ? (
+          <img src={proj.imageUrl} alt={proj.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <motion.span style={{ y: ghostY, fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(28px,4vw,44px)', color: 'rgba(255,255,255,0.14)', userSelect: 'none', position: 'relative', zIndex: 10 }}>
+            {proj.name}
+          </motion.span>
+        )}
       </div>
       <div style={{ padding: '0 32px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
         <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 600, fontSize: 'clamp(20px,2.4vw,26px)', lineHeight: 1.3, color: '#fff', maxWidth: 560 }}>{proj.headline}</span>

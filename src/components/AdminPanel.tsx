@@ -527,15 +527,17 @@ export default function AdminPanel() {
 
   /* Tab */
   const [tab, setTab] = useState<TabKey>('hero')
-  const { syncStatus } = usePortfolio()
+  const { syncStatus, pushToCloud } = usePortfolio()
 
   /* Sync status display helpers */
   const syncLabel = syncStatus === 'saving' ? '⟳ Syncing to cloud…'
     : syncStatus === 'saved' ? '✓ Saved to cloud'
+    : syncStatus === 'unsaved' ? 'Unsaved changes'
     : syncStatus === 'error' ? '⚠ Cloud sync failed (saved locally)'
     : '● Ready'
   const syncColor = syncStatus === 'saving' ? T.accent
     : syncStatus === 'saved' ? T.success
+    : syncStatus === 'unsaved' ? T.warning || '#f59e0b'
     : syncStatus === 'error' ? T.danger
     : T.muted
 
@@ -568,11 +570,18 @@ export default function AdminPanel() {
       <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 60, background: T.surface, borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', padding: '0 24px', gap: 20 }}>
         <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 16, color: T.text }}>🎨 Portfolio Admin</span>
         <div style={{ flex: 1 }} />
-        {/* Sync status */}
-        <span style={{ fontSize: 12, color: syncColor, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: syncColor, display: 'inline-block', animation: syncStatus === 'saving' ? 'pulse 1s infinite' : 'none' }} />
-          {syncLabel}
-        </span>
+        {/* Sync status & Push Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 12, color: syncColor, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: syncColor, display: 'inline-block', animation: syncStatus === 'saving' ? 'pulse 1s infinite' : 'none' }} />
+            {syncLabel}
+          </span>
+          {syncStatus === 'unsaved' && (
+            <button onClick={pushToCloud} style={{ background: T.accent, color: T.bg, border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, fontFamily: 'Poppins,sans-serif', cursor: 'pointer' }}>
+              Push to Live Site
+            </button>
+          )}
+        </div>
         <Btn onClick={() => { window.location.hash = '' }} color="rgba(255,255,255,0.06)" textColor={T.text}>View Site →</Btn>
         <Btn onClick={() => { sessionStorage.removeItem('admin_v2'); setAuthed(false) }} color="rgba(239,68,68,0.15)" textColor={T.danger}>Log out</Btn>
       </header>
