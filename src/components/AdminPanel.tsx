@@ -190,6 +190,7 @@ function ExpertiseEditor() {
 
 function MagicAIBox({ onResult }: { onResult: (data: Partial<FeaturedProject>) => void }) {
   const [prompt, setPrompt] = useState('')
+  const [engine, setEngine] = useState<'gemini' | 'claude'>('gemini')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -200,7 +201,7 @@ function MagicAIBox({ onResult }: { onResult: (data: Partial<FeaturedProject>) =
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ prompt, engine })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to generate')
@@ -217,13 +218,17 @@ function MagicAIBox({ onResult }: { onResult: (data: Partial<FeaturedProject>) =
     <div style={{ padding: 16, background: 'rgba(255, 128, 74, 0.05)', border: `1px solid ${T.accentBorder}`, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span>✨</span>
-        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 14, color: T.accent }}>Magic AI Form Filler (Claude)</span>
+        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 14, color: T.accent }}>Magic AI Form Filler</span>
+        <select value={engine} onChange={e => setEngine(e.target.value as any)} style={{ marginLeft: 'auto', background: T.surface, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: '4px 8px', fontSize: 12, fontFamily: 'Poppins,sans-serif', outline: 'none' }}>
+          <option value="gemini">Gemini 1.5 Flash (Free)</option>
+          <option value="claude">Claude 3 Haiku</option>
+        </select>
       </div>
       <p style={{ margin: 0, fontSize: 12, color: T.muted }}>Paste your messy notes, Slack messages, or raw thoughts below. Claude will parse it and fill out the fields automatically.</p>
       <Ta value={prompt} onChange={setPrompt} rows={3} placeholder="e.g. I worked on a fintech app called Health4Monii as a UI intern..." />
       {error && <span style={{ color: T.danger, fontSize: 12 }}>{error}</span>}
       <button onClick={handleGenerate} disabled={loading || !prompt} style={{ background: T.accent, color: T.bg, border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: 'Poppins,sans-serif', cursor: loading || !prompt ? 'not-allowed' : 'pointer', alignSelf: 'flex-start', opacity: loading || !prompt ? 0.5 : 1 }}>
-        {loading ? '⟳ Claude is thinking...' : '✨ Auto-Fill Fields'}
+        {loading ? `⟳ ${engine === 'gemini' ? 'Gemini' : 'Claude'} is thinking...` : '✨ Auto-Fill Fields'}
       </button>
     </div>
   )
