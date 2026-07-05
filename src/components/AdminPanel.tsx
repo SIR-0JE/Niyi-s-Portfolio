@@ -528,10 +528,18 @@ export default function AdminPanel() {
   /* Tab */
   const [tab, setTab] = useState<TabKey>('hero')
   const [saving, setSaving] = useState(false)
-
+  const { syncStatus } = usePortfolio()
   const flash = () => { setSaving(true); setTimeout(() => setSaving(false), 700) }
 
-  /* Auto-flash triggered by child section saves — usePortfolio used in sub-components */
+  /* Sync status display helpers */
+  const syncLabel = syncStatus === 'saving' ? '⟳ Syncing to cloud…'
+    : syncStatus === 'saved' ? '✓ Saved to cloud'
+    : syncStatus === 'error' ? '⚠ Cloud sync failed (saved locally)'
+    : '● Ready'
+  const syncColor = syncStatus === 'saving' ? T.accent
+    : syncStatus === 'saved' ? T.success
+    : syncStatus === 'error' ? T.danger
+    : T.muted
 
   if (!authed) {
     return (
@@ -563,9 +571,9 @@ export default function AdminPanel() {
         <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 16, color: T.text }}>🎨 Portfolio Admin</span>
         <div style={{ flex: 1 }} />
         {/* Sync status */}
-        <span style={{ fontSize: 12, color: saving ? T.accent : T.success, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: saving ? T.accent : T.success, display: 'inline-block', animation: saving ? 'pulse 1s infinite' : 'none' }} />
-          {saving ? 'Saving…' : 'Saved to localStorage'}
+        <span style={{ fontSize: 12, color: syncColor, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: syncColor, display: 'inline-block', animation: syncStatus === 'saving' ? 'pulse 1s infinite' : 'none' }} />
+          {syncLabel}
         </span>
         <Btn onClick={() => { window.location.hash = '' }} color="rgba(255,255,255,0.06)" textColor={T.text}>View Site →</Btn>
         <Btn onClick={() => { sessionStorage.removeItem('admin_v2'); setAuthed(false) }} color="rgba(239,68,68,0.15)" textColor={T.danger}>Log out</Btn>

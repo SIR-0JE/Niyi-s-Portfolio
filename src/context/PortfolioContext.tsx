@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import { fetchPortfolio, savePortfolio } from '../lib/db'
 
 /* ─────────────────────────────────────────────
    DATA TYPES — matches every editable field
@@ -297,11 +298,14 @@ interface CtxType {
   set: (patch: Partial<PortfolioContent>) => void
   setNested: <K extends keyof PortfolioContent>(key: K, val: PortfolioContent[K]) => void
   reset: () => void
+  /** 'idle' | 'saving' | 'saved' | 'error' */
+  syncStatus: 'idle' | 'saving' | 'saved' | 'error'
 }
 
 const Ctx = createContext<CtxType | undefined>(undefined)
 
 export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // ── 1. Bootstrap from localStorage immediately (instant load) ──
   const [data, setData] = useState<PortfolioContent>(() => {
     try {
       const raw = localStorage.getItem('portfolio_v2')
@@ -310,24 +314,53 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return DEFAULT
   })
 
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const isFirstMount = useRef(true)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── 2. On mount: fetch from Supabase and hydrate ──
   useEffect(() => {
+    fetchPortfolio().then(remote => {
+      if (remote) {
+        setData(prev => ({ ...DEFAULT, ...prev, ...remote }))
+        // Also update local cache
+        try { localStorage.setItem('portfolio_v2', JSON.stringify({ ...DEFAULT, ...remote })) } catch {}
+      }
+    })
+  }, [])
+
+  // ── 3. Whenever data changes (after first mount): save to both places ──
+  useEffect(() => {
+    if (isFirstMount.current) { isFirstMount.current = false; return }
+
+    // Write to localStorage immediately
     try {
       localStorage.setItem('portfolio_v2', JSON.stringify(data))
     } catch (e) {
-      console.error('LocalStorage quota exceeded or other error saving data', e)
-      alert('Error saving data! An image you uploaded might be too large. Try uploading a smaller image.')
+      console.error('LocalStorage quota exceeded', e)
+      alert('Image may be too large for storage. Try a smaller image.')
     }
+
+    // Debounce Supabase write by 1.5s to avoid hammering the DB while typing
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    setSyncStatus('saving')
+    saveTimer.current = setTimeout(async () => {
+      const ok = await savePortfolio(data)
+      setSyncStatus(ok ? 'saved' : 'error')
+      // Reset status badge after 3s
+      setTimeout(() => setSyncStatus('idle'), 3000)
+    }, 1500)
   }, [data])
 
-  const set = (patch: Partial<PortfolioContent>) =>
-    setData(prev => ({ ...prev, ...patch }))
+  const set = useCallback((patch: Partial<PortfolioContent>) =>
+    setData(prev => ({ ...prev, ...patch })), [])
 
-  const setNested = <K extends keyof PortfolioContent>(key: K, val: PortfolioContent[K]) =>
-    setData(prev => ({ ...prev, [key]: val }))
+  const setNested = useCallback(<K extends keyof PortfolioContent>(key: K, val: PortfolioContent[K]) =>
+    setData(prev => ({ ...prev, [key]: val })), [])
 
-  const reset = () => setData(DEFAULT)
+  const reset = useCallback(() => setData(DEFAULT), [])
 
-  return <Ctx.Provider value={{ data, set, setNested, reset }}>{children}</Ctx.Provider>
+  return <Ctx.Provider value={{ data, set, setNested, reset, syncStatus }}>{children}</Ctx.Provider>
 }
 
 export const usePortfolio = () => {
