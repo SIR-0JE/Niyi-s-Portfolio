@@ -315,9 +315,8 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return DEFAULT
   })
 
-  const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error' | 'unsaved'>('idle')
   const isFirstMount = useRef(true)
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── 2. On mount: fetch from Supabase and hydrate ──
   useEffect(() => {

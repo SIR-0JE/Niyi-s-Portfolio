@@ -12,8 +12,6 @@ const BG = 'rgb(1,2,8)'
 function ProjectCard({ proj, i }: { proj: ReturnType<typeof usePortfolio>['data']['featuredProjects'][0]; i: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.08 })
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
-  const ghostY = useTransform(scrollYProgress, [0, 1], [24, -24])
   return (
     <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: i * 0.12 }}
       whileHover={{ y: -8, borderColor: 'rgba(255,128,74,0.3)' }}

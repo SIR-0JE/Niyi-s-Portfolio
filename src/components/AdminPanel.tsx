@@ -537,7 +537,7 @@ export default function AdminPanel() {
     : '● Ready'
   const syncColor = syncStatus === 'saving' ? T.accent
     : syncStatus === 'saved' ? T.success
-    : syncStatus === 'unsaved' ? T.warning || '#f59e0b'
+    : syncStatus === 'unsaved' ? '#f59e0b'
     : syncStatus === 'error' ? T.danger
     : T.muted
 
