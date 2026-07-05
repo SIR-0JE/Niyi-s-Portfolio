@@ -77,6 +77,12 @@ function MainContent() {
   const [route, setRoute] = useState(() => window.location.hash || '#/')
 
   useEffect(() => {
+    // If a user types /admin instead of /#/admin, redirect them to the hash version
+    if (window.location.pathname !== '/' && !window.location.hash) {
+      window.location.replace(`/#${window.location.pathname}`)
+      return
+    }
+
     const onChange = () => { setRoute(window.location.hash || '#/'); window.scrollTo({ top: 0, behavior: 'instant' }) }
     window.addEventListener('hashchange', onChange)
     return () => window.removeEventListener('hashchange', onChange)
