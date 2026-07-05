@@ -188,6 +188,47 @@ function ExpertiseEditor() {
   )
 }
 
+function MagicAIBox({ onResult }: { onResult: (data: Partial<FeaturedProject>) => void }) {
+  const [prompt, setPrompt] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleGenerate = async () => {
+    if (!prompt) return
+    setLoading(true); setError('')
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to generate')
+      onResult(data)
+      setPrompt('')
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div style={{ padding: 16, background: 'rgba(255, 128, 74, 0.05)', border: `1px solid ${T.accentBorder}`, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span>✨</span>
+        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 14, color: T.accent }}>Magic AI Form Filler (Claude)</span>
+      </div>
+      <p style={{ margin: 0, fontSize: 12, color: T.muted }}>Paste your messy notes, Slack messages, or raw thoughts below. Claude will parse it and fill out the fields automatically.</p>
+      <Ta value={prompt} onChange={setPrompt} rows={3} placeholder="e.g. I worked on a fintech app called Health4Monii as a UI intern..." />
+      {error && <span style={{ color: T.danger, fontSize: 12 }}>{error}</span>}
+      <button onClick={handleGenerate} disabled={loading || !prompt} style={{ background: T.accent, color: T.bg, border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: 'Poppins,sans-serif', cursor: loading || !prompt ? 'not-allowed' : 'pointer', alignSelf: 'flex-start', opacity: loading || !prompt ? 0.5 : 1 }}>
+        {loading ? '⟳ Claude is thinking...' : '✨ Auto-Fill Fields'}
+      </button>
+    </div>
+  )
+}
+
 function FeaturedProjectsEditor() {
   const { data, setNested } = usePortfolio()
   const projs = data.featuredProjects
@@ -210,6 +251,7 @@ function FeaturedProjectsEditor() {
             <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: T.text, flex: 1 }}>{proj.name || `Project ${i + 1}`}</span>
             <Ghost onClick={() => setNested('featuredProjects', projs.filter((_, j) => j !== i))}>Remove</Ghost>
           </div>
+          <MagicAIBox onResult={data => updProj(i, data)} />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Field label="Project name"><Inp value={proj.name} onChange={v => updProj(i, { name: v })} /></Field>
             <Field label="Route / href"><Inp value={proj.href} onChange={v => updProj(i, { href: v })} /></Field>
