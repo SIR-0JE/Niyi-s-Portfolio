@@ -1,93 +1,128 @@
-import React from 'react'
-import { usePortfolio } from '../context/PortfolioContext'
-import FadeIn from '../components/FadeIn'
-import Magnet from '../components/Magnet'
-import { ArrowDown } from 'lucide-react'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 
-const HeroSection: React.FC = () => {
-  const { data } = usePortfolio()
+/* ─── Word-by-word animated headline ──────────────────────────────────── */
+function AnimatedHeadline() {
+  const ref = useRef<HTMLHeadingElement>(null)
+  const inView = useInView(ref, { once: true, amount: 0.2 })
 
-  const handleScrollToProjects = () => {
-    const section = document.getElementById('projects-section')
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth' })
-    }
-  }
+  // Words and which ones are orange
+  const parts = [
+    { word: "I'M",         orange: false },
+    { word: 'A',           orange: false },
+    { word: 'UI/UX',       orange: false },
+    { word: 'DESIGNER',    orange: false },
+    { word: 'WHO',         orange: false },
+    { word: 'DESIGNS',     orange: false },
+    { word: 'USER-',       orange: true  },
+    { word: 'CENTERED',    orange: true  },
+    { word: 'EXPERIENCES', orange: true  },
+  ]
 
   return (
-    <section
-      id="hero-section"
-      className="relative h-screen flex flex-col justify-between items-center text-[#D7E2EA] px-6 sm:px-10 py-12 select-none overflow-hidden"
+    <h1
+      ref={ref}
+      className="font-display font-black uppercase leading-[0.9] tracking-tight"
+      style={{ fontSize: 'clamp(3rem, 9vw, 7rem)' }}
     >
-      {/* Background Portrait behind content / layered */}
-      <div 
-        className="absolute left-1/2 -translate-x-1/2 z-0
-          top-1/2 -translate-y-1/2
-          w-[280px] sm:w-[360px] md:w-[440px] lg:w-[490px] opacity-70 hover:opacity-100 transition-opacity"
-      >
-        <Magnet padding={150} strength={3}>
-          <div className="relative group cursor-pointer w-full h-full">
-            {/* Neutral Portrait */}
-            <img
-              src={data.hero.portrait}
-              alt="Niyi portrait"
-              className="w-full h-auto object-contain transition-opacity duration-300 group-hover:opacity-0"
-              draggable={false}
-            />
-            {/* Smiling/Hover Portrait */}
-            {data.hero.portraitHover && (
-              <img
-                src={data.hero.portraitHover}
-                alt="Niyi portrait smiling"
-                className="absolute inset-0 w-full h-auto object-contain transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-                draggable={false}
-              />
-            )}
-          </div>
-        </Magnet>
-      </div>
+      {parts.map((p, i) => (
+        <motion.span
+          key={i}
+          initial={{ opacity: 0, y: 80 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+          className={`inline-block mr-[0.2em] ${p.orange ? 'text-orange' : 'text-text'}`}
+        >
+          {p.word}
+        </motion.span>
+      ))}
+    </h1>
+  )
+}
 
-      {/* Empty space for top header spacer */}
-      <div />
+/* ─── Stats ────────────────────────────────────────────────────────────── */
+const stats = [
+  { val: '5+',    label: 'Client Projects' },
+  { val: '89%',   label: 'Client Satisfaction' },
+  { val: '1,939', label: 'Total Users Reached' },
+  { val: '4',     label: 'Launched Products' },
+]
 
-      {/* Centered H1 hooks */}
-      <div className="w-full max-w-5xl text-center flex flex-col items-center gap-6 z-10">
-        <FadeIn delay={0.15} y={40}>
-          <h1
-            className="hero-heading font-black uppercase leading-[1.05] tracking-tighter"
-            style={{ fontSize: 'clamp(2.5rem, 6.5vw, 95px)' }}
+export default function HeroSection() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { scrollY } = useScroll()
+  const y = useTransform(scrollY, [0, 600], [0, -100])
+
+  return (
+    <section className="relative pt-28 pb-20 overflow-hidden" id="top">
+      <div className="wrap relative z-10">
+        <motion.div style={{ y }}>
+          {/* Availability badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="flex items-center gap-2 mb-7"
           >
-            {data.hero.title}
-          </h1>
-        </FadeIn>
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
+            <span className="font-mono text-[0.62rem] tracking-[0.18em] uppercase text-muted">
+              Available for new projects
+            </span>
+          </motion.div>
 
-        <FadeIn delay={0.3} y={20}>
-          <span 
-            className="text-purple-400 font-bold uppercase tracking-widest bg-purple-950/20 border border-purple-500/10 px-4 py-2 rounded-full font-mono text-xs sm:text-sm"
+          {/* BIG HEADLINE */}
+          <AnimatedHeadline />
+
+          {/* Sub-text + CTAs — same row, left text / right buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.8 }}
+            className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6"
           >
-            {data.hero.subtitle}
-          </span>
-        </FadeIn>
-      </div>
+            <p className="text-muted text-sm leading-relaxed max-w-[38ch]">
+              Over 5 years crafting interfaces that reduce friction and move the numbers — from voter turnout to first-time access to care.
+            </p>
+            <div className="flex items-center gap-3 shrink-0">
+              <a
+                href="#work"
+                className="font-mono text-[0.65rem] tracking-[0.12em] uppercase bg-orange text-white px-6 py-3 hover:opacity-90 transition-opacity"
+              >
+                View Work
+              </a>
+              <a
+                href="mailto:olaniyiojedokun24@gmail.com"
+                className="font-mono text-[0.65rem] tracking-[0.12em] uppercase border border-white/20 text-text px-6 py-3 hover:border-orange hover:text-orange transition-all duration-200"
+              >
+                Get In Touch
+              </a>
+            </div>
+          </motion.div>
+        </motion.div>
 
-      {/* Bottom CTA indicator */}
-      <div className="z-10 flex flex-col items-center">
-        <FadeIn delay={0.5} y={20}>
-          <Magnet strength={20}>
-            <button
-              onClick={handleScrollToProjects}
-              className="group flex flex-col items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-400 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
+        {/* ── Stats row ── no outer border, just dividers between items ── */}
+        <motion.div
+          ref={containerRef}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 1.1 }}
+          className="mt-20 border-t border-brd grid grid-cols-2 sm:grid-cols-4"
+        >
+          {stats.map((s, i) => (
+            <div
+              key={i}
+              className={`py-7 px-6 ${i < stats.length - 1 ? 'border-r border-brd' : ''}`}
             >
-              <span>Explore My Work</span>
-              <span className="w-10 h-10 rounded-full border border-neutral-800 flex items-center justify-center group-hover:border-purple-500 transition-colors">
-                <ArrowDown size={14} className="animate-bounce" />
-              </span>
-            </button>
-          </Magnet>
-        </FadeIn>
+              <div className="font-display font-black text-3xl sm:text-4xl text-text mb-1.5">
+                {s.val}
+              </div>
+              <div className="font-mono text-[0.58rem] tracking-[0.14em] uppercase text-muted">
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   )
 }
-
-export default HeroSection

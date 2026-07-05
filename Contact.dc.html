@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:rgb(1,2,8); }
+  ::selection { background:rgb(255,128,74); color:rgb(1,2,8); }
+  .field::placeholder { color: rgb(120,120,126); }
+</style>
+</helmet>
+<div data-screen-label="Contact" style="background:rgb(1,2,8);min-height:100vh;display:flex;flex-direction:column;">
+  <dc-import name="Navbar" active="Contact" style="position:relative;" hint-size="100%,88px"></dc-import>
+
+  <div style="flex:1;padding:96px clamp(24px,5vw,100px);box-sizing:border-box;">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:row;gap:64px;flex-wrap:wrap;">
+
+      <div style="flex:1 1 380px;display:flex;flex-direction:column;gap:24px;">
+        <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(32px,5vw,56px);line-height:1.15;color:rgb(255,255,255);">Let's build<br>something<br><span style="color:rgb(255,128,74);">user-centered.</span></span>
+        <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:18px;line-height:1.7;color:rgb(203,203,203);max-width:440px;">Open to freelance and full-time UI/UX roles. Tell me about your product and I'll get back to you quickly.</span>
+
+        <div style="display:flex;flex-direction:column;gap:20px;margin-top:24px;">
+          <a href="mailto:olaniyiojedokun24@gmail.com" style="display:flex;flex-direction:column;gap:4px;text-decoration:none;">
+            <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);text-transform:uppercase;letter-spacing:0.06em;">Email</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:20px;color:rgb(255,255,255);">olaniyiojedokun24@gmail.com</span>
+          </a>
+          <a href="tel:+2349135382861" style="display:flex;flex-direction:column;gap:4px;text-decoration:none;">
+            <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);text-transform:uppercase;letter-spacing:0.06em;">Phone</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:20px;color:rgb(255,255,255);">0913 538 2861</span>
+          </a>
+          <a href="https://www.linkedin.com/in/olaniyi-ojedokun" target="_blank" rel="noopener" style="display:flex;flex-direction:column;gap:4px;text-decoration:none;">
+            <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);text-transform:uppercase;letter-spacing:0.06em;">LinkedIn</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:20px;color:rgb(255,255,255);">linkedin.com/in/olaniyi-ojedokun</span>
+          </a>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);text-transform:uppercase;letter-spacing:0.06em;">Location</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:20px;color:rgb(255,255,255);">Akobo, Ibadan, Nigeria</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:1 1 420px;">
+        <form style="display:flex;flex-direction:column;gap:20px;padding:40px;border-radius:24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);" onsubmit="{{ handleSubmit }}">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);">Name</label>
+            <input class="field" type="text" placeholder="Your name" required="true" style="font-family:'Poppins',sans-serif;font-size:16px;color:rgb(255,255,255);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:14px 16px;outline:none;box-sizing:border-box;" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);">Email</label>
+            <input class="field" type="email" placeholder="you@email.com" required="true" style="font-family:'Poppins',sans-serif;font-size:16px;color:rgb(255,255,255);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:14px 16px;outline:none;box-sizing:border-box;" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <label style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);">Message</label>
+            <textarea class="field" placeholder="Tell me about your project" rows="5" required="true" style="font-family:'Poppins',sans-serif;font-size:16px;color:rgb(255,255,255);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:14px 16px;outline:none;box-sizing:border-box;resize:vertical;"></textarea>
+          </div>
+          <button type="submit" style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:rgb(1,2,8);background:rgb(255,128,74);border:none;border-radius:100px;padding:16px 32px;cursor:pointer;margin-top:8px;">{{ submitLabel }}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <dc-import name="Footer" style="position:relative;" hint-size="100%,320px"></dc-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { sent: false };
+
+  renderVals() {
+    return {
+      submitLabel: this.state.sent ? 'Message sent \u2014 thank you!' : 'Send Message',
+      handleSubmit: (e) => {
+        e.preventDefault();
+        this.setState({ sent: true });
+      },
+    };
+  }
+}
+
+</script>
+</body>
+</html>

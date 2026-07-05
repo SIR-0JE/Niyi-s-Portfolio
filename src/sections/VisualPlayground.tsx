@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { usePortfolio, VisualSnackProject } from '../context/PortfolioContext'
+import { usePortfolio, type VisualSnackProject } from '../context/PortfolioContext'
 import FadeIn from '../components/FadeIn'
 import { X, ExternalLink, Sliders } from 'lucide-react'
 

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:rgb(1,2,8); }
+  ::selection { background:rgb(255,128,74); color:rgb(1,2,8); }
+</style>
+</helmet>
+<div data-screen-label="Projects" style="background:rgb(1,2,8);min-height:100vh;display:flex;flex-direction:column;">
+  <dc-import name="Navbar" active="Projects" style="position:relative;" hint-size="100%,88px"></dc-import>
+
+  <div style="padding:96px clamp(24px,5vw,100px) 40px;box-sizing:border-box;">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:16px;">
+      <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(32px,5vw,56px);color:rgb(255,255,255);">Selected Projects</span>
+      <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:18px;color:rgb(203,203,203);max-width:640px;line-height:1.6;">Four case studies where research led the design, and the design moved a real number.</span>
+    </div>
+  </div>
+
+  <div style="padding:24px clamp(24px,5vw,100px) 96px;box-sizing:border-box;">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:32px;">
+      <sc-for list="{{ projects }}" as="proj" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;border-radius:24px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);overflow:hidden;">
+          <div style="margin:20px;min-height:300px;border-radius:16px;background:rgb(6,8,14);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;">
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(28px,4vw,48px);color:rgba(255,255,255,0.14);">{{ proj.name }}</span>
+          </div>
+          <div style="padding:0 32px 32px;display:flex;flex-direction:column;gap:24px;">
+            <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:clamp(22px,2.6vw,28px);line-height:1.3;color:rgb(255,255,255);max-width:560px;">{{ proj.headline }}</span>
+            <div style="display:flex;flex-direction:row;gap:48px;flex-wrap:wrap;">
+              <sc-for list="{{ proj.stats }}" as="stat" hint-placeholder-count="2">
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <div style="display:flex;flex-direction:row;align-items:baseline;gap:8px;">
+                    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:28px;color:rgb(255,255,255);">{{ stat.before }}</span>
+                    <span style="font-family:'Syne',sans-serif;font-weight:400;font-size:20px;color:rgb(203,203,203);">&#8594;</span>
+                    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:28px;color:rgb(255,128,74);">{{ stat.after }}</span>
+                  </div>
+                  <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:11px;letter-spacing:0.08em;color:rgb(203,203,203);text-transform:uppercase;">{{ stat.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.08);"></div>
+            <div style="display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+              <div style="display:flex;flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap;">
+                <span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;letter-spacing:0.08em;color:rgb(203,203,203);text-transform:uppercase;">{{ proj.role }}</span>
+                <sc-for list="{{ proj.tags }}" as="tag" hint-placeholder-count="2">
+                  <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:11px;letter-spacing:0.04em;color:rgb(203,203,203);text-transform:uppercase;padding:6px 12px;border-radius:100px;background:rgba(255,255,255,0.06);">{{ tag }}</span>
+                </sc-for>
+              </div>
+              <a href="{{ proj.href }}" style="font-family:'Poppins',sans-serif;font-weight:600;font-size:13px;letter-spacing:0.04em;color:rgb(255,128,74);text-transform:uppercase;text-decoration:none;white-space:nowrap;">Case Study &#8599;</a>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <dc-import name="Footer" style="position:relative;" hint-size="100%,320px"></dc-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const projects = [
+      {
+        name: 'Voterix',
+        href: 'Case-Study-Voterix.dc.html',
+        headline: 'Making campus voting so simple people actually vote',
+        stats: [
+          { before: '50%', after: '89%', label: 'Voter turnout \u00b7 NUAMS' },
+          { before: '500', after: '596', label: 'Voters \u00b7 NACOS' },
+        ],
+        role: 'Founder & Product Designer',
+        tags: ['UX Research', 'Usability Testing', 'Interaction Design'],
+      },
+      {
+        name: 'Health4Moni',
+        href: 'Case-Study-Health4Moni.dc.html',
+        headline: 'Turning a confusing insurance sign-up into a checkout people finish',
+        stats: [
+          { before: 'Low-fi', after: 'Hi-fi', label: 'Prototype fidelity' },
+          { before: '0', after: '5', label: 'Users usability-tested' },
+        ],
+        role: 'Product Designer (Intern)',
+        tags: ['Stakeholder Interviews', 'Journey Mapping', 'Prototyping'],
+      },
+      {
+        name: 'The Gaffer',
+        href: 'Case-Study-Gaffer.dc.html',
+        headline: 'Giving local competitions the fixtures & fantasy experience big leagues get',
+        stats: [
+          { before: '0', after: '300+', label: 'Students onboarded' },
+          { before: '0', after: '3 wks', label: 'Bowen Fans League pilot' },
+        ],
+        role: 'Founder & Product Designer',
+        tags: ['Market Research', 'Mobile-First', 'Onboarding'],
+      },
+      {
+        name: 'Mindvox',
+        href: 'Case-Study-Mindvox.dc.html',
+        headline: 'A Pidgin-first, judgment-free first step into mental health support',
+        stats: [
+          { before: 'Anon.', after: 'Trusted', label: 'Onboarding model' },
+          { before: 'Online', after: 'Offline-first', label: 'Network resilience' },
+        ],
+        role: 'Lead Product Designer \u00b7 Capstone',
+        tags: ['Conversational UI', 'Accessibility', 'Usability Testing'],
+      },
+    ];
+    return { projects };
+  }
+}
+
+</script>
+</body>
+</html>

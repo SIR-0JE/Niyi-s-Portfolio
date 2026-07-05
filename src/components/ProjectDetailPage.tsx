@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { usePortfolio, CaseStudyProject, VisualSnackProject } from '../context/PortfolioContext'
+import { usePortfolio, type CaseStudyProject, type VisualSnackProject } from '../context/PortfolioContext'
 import FadeIn from './FadeIn'
 import { ArrowLeft, ExternalLink, ShieldAlert, Award, Hammer, Compass, CheckCircle2, Sliders, Layers } from 'lucide-react'
 

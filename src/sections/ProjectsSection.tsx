@@ -1,226 +1,161 @@
-import React, { useRef } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
-import { usePortfolio } from '../context/PortfolioContext'
-import type { ProjectData } from '../context/PortfolioContext'
-import FadeIn from '../components/FadeIn'
-import { ArrowRight } from 'lucide-react'
+import { useRef } from 'react'
+import { motion, useInView, useScroll, useTransform } from 'framer-motion'
 
-interface ProjectCardProps {
-  project: ProjectData
-  index: number
-  totalCards: number
-  sectionRef: React.RefObject<HTMLDivElement | null>
-}
+const projects = [
+  {
+    id: 'voterix',
+    name: 'Voterix',
+    title: 'Making campus voting so simple people actually vote',
+    metrics: [
+      { before: '50%', after: '89%', lab: 'Voter turnout · NUAMS' },
+      { before: '500', after: '596', lab: 'Total voters · NACOS' },
+    ],
+    role: 'Founder & Product Designer',
+    year: '2025',
+    tags: ['UX Research', 'Interaction Design', 'Usability Testing'],
+    href: '#/project/1',
+  },
+  {
+    id: 'health',
+    name: 'Health4Moni',
+    title: 'Turning a confusing insurance sign-up into a checkout people finish',
+    metrics: [
+      { before: 'End‑to‑End', after: '', lab: 'Research → Hi-fi prototype' },
+      { before: 'Every', after: 'Screen', lab: 'Onboarding · KYC · Checkout' },
+    ],
+    role: 'Product Designer (Intern)',
+    year: '2024',
+    tags: ['Wireframing', 'Prototyping', 'Design Systems'],
+    href: '#/project/4',
+  },
+]
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, totalCards, sectionRef }) => {
-  const cardRef = useRef<HTMLDivElement>(null)
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end end'],
-  })
-
-  // Stacking scale calculation
-  const progressRatio = totalCards > 1 ? index / (totalCards - 1) : 0
-  const targetScale = 1 - (totalCards - 1 - index) * 0.03
-
-  const scale = useTransform(
-    scrollYProgress,
-    [progressRatio * 0.8, 1],
-    [1, targetScale]
-  )
-
-  const borderRadius = 'clamp(40px, 5vw, 60px)'
-
-  return (
-    <div
-      className="min-h-[60vh] sm:min-h-[70vh] py-6 sm:py-8 flex items-start sticky top-24 md:top-32"
-      style={{ top: `${index * 28}px` }}
-    >
-      <motion.div
-        ref={cardRef}
-        style={{
-          scale,
-          transformOrigin: 'top center',
-          borderRadius,
-        }}
-        className="w-full border-2 border-[#D7E2EA] bg-[#0C0C0C] p-5 sm:p-7 md:p-9 overflow-hidden flex flex-col gap-6"
-      >
-        {/* Top row */}
-        <div className="flex items-center justify-between gap-4 flex-wrap border-b border-white/5 pb-4">
-          <div 
-            className="flex items-baseline gap-4 sm:gap-6 cursor-pointer group"
-            onClick={() => { window.location.hash = `#/project/${project.num}` }}
-          >
-            <span
-              className="hero-heading font-black leading-none group-hover:opacity-80 transition-opacity"
-              style={{ fontSize: 'clamp(2.5rem, 8vw, 100px)' }}
-            >
-              {project.num}
-            </span>
-            <div className="flex flex-col">
-              <span className="text-purple-400 font-bold uppercase tracking-widest text-[10px] sm:text-xs">
-                {project.category}
-              </span>
-              <h2
-                className="text-white font-black uppercase tracking-tight group-hover:text-purple-400 transition-colors"
-                style={{ fontSize: 'clamp(1.1rem, 2.5vw, 2.2rem)' }}
-              >
-                {project.name}
-              </h2>
-            </div>
-          </div>
-          <button
-            onClick={() => { window.location.hash = `#/project/${project.num}` }}
-            className="rounded-full border-2 border-[#D7E2EA] text-[#D7E2EA] font-medium uppercase tracking-widest px-6 py-2.5 sm:px-8 sm:py-3 text-xs sm:text-sm transition-colors duration-200 hover:bg-[#D7E2EA]/10 cursor-pointer bg-transparent"
-          >
-            View Project
-          </button>
-        </div>
-
-        {/* Dynamic Project Hook Description */}
-        <div className="text-neutral-300 text-sm sm:text-base leading-relaxed font-light font-sans max-w-3xl">
-          {project.template_type === 'casestudy' && project.problem_statement ? (
-            <p><strong>Problem Solved: </strong>{project.problem_statement}</p>
-          ) : (
-            <p>{project.description}</p>
-          )}
-        </div>
-
-        {/* Visual Showcase with Glassmorphic Metric Overlay */}
-        <div 
-          className="relative flex gap-3 sm:gap-4 cursor-pointer overflow-hidden rounded-[30px]"
-          onClick={() => { window.location.hash = `#/project/${project.num}` }}
-        >
-          {/* Left stacked images - 40% */}
-          <div className="flex flex-col gap-3 sm:gap-4" style={{ width: '40%' }}>
-            {project.col1img1 && (
-              <img
-                src={project.col1img1}
-                alt={`${project.name} mockup 1`}
-                loading="lazy"
-                className="w-full object-cover"
-                style={{
-                  height: 'clamp(120px, 15vw, 200px)',
-                  borderRadius: 'clamp(15px, 2vw, 25px)',
-                }}
-              />
-            )}
-            {project.col1img2 && (
-              <img
-                src={project.col1img2}
-                alt={`${project.name} mockup 2`}
-                loading="lazy"
-                className="w-full object-cover"
-                style={{
-                  height: 'clamp(140px, 20vw, 280px)',
-                  borderRadius: 'clamp(15px, 2vw, 25px)',
-                }}
-              />
-            )}
-          </div>
-
-          {/* Right main image - 60% */}
-          <div style={{ width: '60%' }} className="relative">
-            {project.col2img && (
-              <img
-                src={project.col2img}
-                alt={`${project.name} visual preview`}
-                loading="lazy"
-                className="w-full h-full object-cover"
-                style={{
-                  minHeight: 'clamp(270px, 35vw, 490px)',
-                  borderRadius: 'clamp(15px, 2vw, 25px)',
-                }}
-              />
-            )}
-          </div>
-
-          {/* Glassmorphic Metrics Badge Overlay - overlaps bottom-left of images container */}
-          {project.template_type === 'casestudy' && project.success_metrics && project.success_metrics.length > 0 && (
-            <div className="absolute bottom-6 left-6 z-20 bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2.5 rounded-2xl shadow-xl max-w-[80%] pointer-events-none select-none">
-              <span className="text-white text-xs sm:text-sm font-bold tracking-wide flex items-center gap-1.5 font-sans">
-                {project.success_metrics[0]}
-              </span>
-            </div>
-          )}
-        </div>
-      </motion.div>
-    </div>
-  )
-}
-
-interface ProjectsSectionProps {
-  /** When true, shows only the first 2 projects as a teaser with a "View All Work" CTA */
-  preview?: boolean
-}
-
-const ProjectsSection: React.FC<ProjectsSectionProps> = ({ preview = false }) => {
-  const { data } = usePortfolio()
-  const sectionRef = useRef<HTMLDivElement>(null)
-
-  // In preview mode, limit to the first 2 projects
-  const visibleProjects = preview ? data.projects.slice(0, 2) : data.projects
-  const TOTAL = visibleProjects.length
+function ProjectCard({ proj, i }: { proj: typeof projects[0]; i: number }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, amount: 0.1 })
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
+  // Parallax: ghost text moves at different speed
+  const ghostY = useTransform(scrollYProgress, [0, 1], [30, -30])
 
   return (
-    <section
-      id="projects-section"
-      ref={sectionRef}
-      className="bg-[#0C0C0C] rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px]
-        -mt-10 sm:-mt-12 md:-mt-14 z-10 relative
-        px-5 sm:px-8 md:px-10 pt-20 sm:pt-24 md:pt-32 pb-32"
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 50 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
+      className="bg-[#0e0e0e] border border-white/[0.06] group hover:border-white/[0.12] transition-colors duration-300"
     >
-      {/* Section heading */}
-      <FadeIn delay={0} y={40} className="mb-16 sm:mb-20 md:mb-28">
-        <h2
-          className="hero-heading font-black uppercase leading-none tracking-tight text-center"
-          style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
+      {/* Cover with ghost text */}
+      <div className="relative h-52 sm:h-64 overflow-hidden flex items-center justify-center border-b border-white/[0.06]">
+        <motion.span
+          style={{ y: ghostY }}
+          className="font-display font-black text-[5rem] sm:text-[7rem] tracking-tighter select-none pointer-events-none"
+          style={{ y: ghostY, color: 'rgba(255,255,255,0.04)' } as React.CSSProperties}
         >
-          Work
-        </h2>
-        {preview && (
-          <p className="text-center text-neutral-500 text-xs uppercase tracking-widest mt-4 font-semibold">
-            Featured Outcomes
-          </p>
-        )}
-      </FadeIn>
+          {proj.name}
+        </motion.span>
 
-      {/* Project cards */}
-      <div className="flex flex-col gap-0">
-        {visibleProjects.map((project, index) => (
-          <ProjectCard
-            key={project.num + '-' + index}
-            project={project}
-            index={index}
-            totalCards={TOTAL}
-            sectionRef={sectionRef}
-          />
-        ))}
+        {/* Hover arrow */}
+        <a
+          href={proj.href}
+          className="absolute bottom-4 right-4 w-9 h-9 bg-orange flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300"
+        >
+          <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M7 17L17 7M17 7H8M17 7V16" />
+          </svg>
+        </a>
+
+        <span className="absolute top-4 left-4 font-mono text-[0.55rem] tracking-[0.16em] uppercase text-orange/70">
+          {proj.year}
+        </span>
       </div>
 
-      {/* "View All Work" CTA — only shown in preview mode */}
-      {preview && (
-        <FadeIn delay={0.2} y={30} className="flex justify-center mt-20 sm:mt-24 md:mt-28">
-          <button
-            onClick={() => { window.location.hash = '#/projects' }}
-            className="group relative flex items-center gap-3 px-8 sm:px-10 py-4 rounded-full
-              bg-transparent border-2 border-[#D7E2EA]/30 text-[#D7E2EA]
-              text-sm sm:text-base font-bold uppercase tracking-widest
-              hover:border-[#D7E2EA] hover:bg-[#D7E2EA]/5
-              transition-all duration-300 cursor-pointer overflow-hidden"
+      {/* Card body */}
+      <div className="p-6 sm:p-8">
+        <h3 className="font-display font-bold text-xl sm:text-2xl leading-tight text-text mb-6 group-hover:text-orange transition-colors duration-300">
+          {proj.title}
+        </h3>
+
+        {/* Metrics */}
+        <div className="flex gap-8 sm:gap-14 mb-6 flex-wrap">
+          {proj.metrics.map((m, idx) => (
+            <div key={idx}>
+              <div className="font-display font-black text-2xl sm:text-3xl text-text leading-none">
+                {m.before}
+                {m.before && m.after && (
+                  <span className="text-white/30 font-normal mx-2 text-xl">→</span>
+                )}
+                {m.after && <span className="text-orange">{m.after}</span>}
+              </div>
+              <div className="font-mono text-[0.56rem] tracking-[0.14em] uppercase text-muted mt-1.5">{m.lab}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer: role + tags + case study link */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-5 border-t border-white/[0.06]">
+          <span className="font-mono text-[0.58rem] tracking-[0.12em] uppercase text-muted">{proj.role}</span>
+          <div className="flex gap-2 flex-wrap">
+            {proj.tags.slice(0, 2).map((t, idx) => (
+              <span key={idx} className="font-mono text-[0.55rem] tracking-[0.1em] uppercase text-white/25 border border-white/10 px-2.5 py-1">
+                {t}
+              </span>
+            ))}
+          </div>
+          <a
+            href={proj.href}
+            className="ml-auto font-mono text-[0.6rem] tracking-[0.12em] uppercase text-orange flex items-center gap-1.5 group-hover:gap-2.5 transition-all duration-200"
           >
-            <span className="absolute inset-0 w-0 bg-gradient-to-r from-purple-600/10 to-transparent group-hover:w-full transition-all duration-500 rounded-full" />
-            <span className="relative">View All Work</span>
-            <ArrowRight
-              size={17}
-              className="relative transition-transform duration-300 group-hover:translate-x-1.5"
-            />
-          </button>
-        </FadeIn>
-      )}
+            Case study
+            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M7 17L17 7M17 7H8M17 7V16" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+export default function ProjectsSection() {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, amount: 0.1 })
+
+  return (
+    <section className="py-20 border-t border-brd" id="work">
+      <div className="wrap">
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-12">
+          <motion.div
+            ref={ref}
+            initial={{ opacity: 0, x: -20 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5 }}
+            className="flex items-center gap-2"
+          >
+            <span className="text-orange text-[0.55rem]">◆</span>
+            <span className="font-mono text-[0.65rem] tracking-[0.16em] uppercase text-orange">Featured Work</span>
+          </motion.div>
+          <motion.a
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            href="#/projects"
+            className="font-mono text-[0.58rem] tracking-[0.12em] uppercase text-muted hover:text-orange transition-colors duration-200 flex items-center gap-1"
+          >
+            View all
+            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M7 17L17 7M17 7H8M17 7V16" />
+            </svg>
+          </motion.a>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {projects.map((p, i) => (
+            <ProjectCard key={p.id} proj={p} i={i} />
+          ))}
+        </div>
+      </div>
     </section>
   )
 }
-
-export default ProjectsSection

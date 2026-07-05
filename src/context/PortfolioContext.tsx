@@ -1,378 +1,340 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
-export interface HeroData {
+/* ─────────────────────────────────────────────
+   DATA TYPES — matches every editable field
+   visible across all pages of the new site.
+───────────────────────────────────────────── */
+
+export interface HeroContent {
+  headline1: string     // "I'M A UI/UX DESIGNER"
+  headline2: string     // "WHO DESIGNS"
+  headline3: string     // "USER-CENTERED"
+  headline4: string     // "EXPERIENCES"
+  subtext: string
+  cta1Label: string
+  cta1Href: string
+  cta2Label: string
+  cta2Href: string
+  stats: { value: string; label: string }[]
+}
+
+export interface ExpertiseCard {
   title: string
-  subtitle: string
-  portrait: string
-  portraitHover: string
+  body: string
 }
 
-export interface TimelineItem {
-  year: string
-  role: string
-  company: string
-  description: string
+export interface Stat {
+  before: string
+  after: string
+  label: string
 }
 
-export interface AboutData {
-  title: string
-  description: string
-  decorMoon: string
-  decorP59: string
-  decorLego: string
-  decorGroup: string
-  skills: string[]
-  timeline: TimelineItem[]
-}
-
-export interface ServiceData {
-  num: string
+export interface FeaturedProject {
   name: string
-  desc: string
+  href: string
+  headline: string
+  role: string
+  imageUrl?: string // Added for homepage placeholders
+  stats: Stat[]
 }
 
-// Shared project properties
-export interface BaseProject {
-  num: string // used as ID
+export interface FAQItem {
+  question: string
+  answer: string
+}
+
+export interface TestimonialItem {
+  name: string
+  role: string
+  quote: string
+}
+
+export interface NavbarContent {
+  logoText: string
+  hireMeHref: string
+}
+
+export interface FooterContent {
+  cta: string
+  email: string
+  copyright: string
+  links: { label: string; href: string }[]
+}
+
+export interface AboutContent {
+  introHeadline: string
+  bio: string
+  portraitUrl: string   // leave empty = show striped placeholder
+}
+
+export interface ExperienceItem {
+  role: string
+  org: string
+  dates: string
+  blurb: string
+}
+
+export interface CaseStudyStat {
+  val: string
+  label: string
+}
+
+export interface ProcessStep {
+  title: string
+  body: string
+}
+
+export interface OutcomeCard {
+  val: string
+  label: string
+}
+
+export interface CaseStudyContent {
+  slug: string   // 'mindvox' | 'voterix' | 'health4moni' | 'gaffer'
   category: string
-  name: string
-  col1img1: string // thumbnail helper
-  col1img2: string // thumbnail helper
-  col2img: string // main thumbnail
-  description: string
+  headline: string
+  stats: CaseStudyStat[]
   role: string
-  tools: string[]
-  liveUrl: string
+  timeline: string
+  categoryTag: string
+  problem: string
+  process: ProcessStep[]
+  outcomes: OutcomeCard[]
+  behanceUrl: string
+  coverImageUrl: string
+  processImageUrl: string
 }
 
-// Discriminated Union types
-export interface CaseStudyProject extends BaseProject {
-  template_type: 'casestudy'
-  problem_statement: string
-  research_insights: string[] // bullet points
-  process_gallery: string[] // wireframe assets etc
-  solution_features: Array<{
-    title: string
-    description: string
-    image_url: string
-  }>
-  success_metrics: string[] // e.g. ["📈 Increased voter turnout by 40%"]
+export interface PortfolioContent {
+  navbar: NavbarContent
+  hero: HeroContent
+  expertise: ExpertiseCard[]
+  featuredProjects: FeaturedProject[]
+  testimonials: TestimonialItem[]
+  faqs: FAQItem[]
+  footer: FooterContent
+  about: AboutContent
+  experience: ExperienceItem[]
+  caseStudies: CaseStudyContent[]
 }
 
-export interface VisualSnackProject extends BaseProject {
-  template_type: 'visual'
-  media_url: string
-  brief_context: string
-  design_system?: {
-    colors: string[]
-    typography: string[]
-  }
-}
-
-export type ProjectData = CaseStudyProject | VisualSnackProject
-
-export interface PortfolioData {
-  hero: HeroData
-  marquee: string[]
-  about: AboutData
-  services: ServiceData[]
-  projects: ProjectData[]
-}
-
-const defaultPortfolioData: PortfolioData = {
+/* ─────────────────────────────────────────────
+   DEFAULT DATA — pre-filled from dc.html files
+───────────────────────────────────────────── */
+const DEFAULT: PortfolioContent = {
+  navbar: {
+    logoText: 'OJEDOKUN',
+    hireMeHref: 'mailto:olaniyiojedokun24@gmail.com',
+  },
   hero: {
-    title: "I design digital products that solve complex problems.",
-    subtitle: 'Niyi — UI/UX & Product Designer.',
-    portrait: 'https://shrug-person-78902957.figma.site/_components/v2/d24c01ad3a56fc65e942a1f501eb73db42d7cf9a/Rectangle_40443.81459862.png',
-    portraitHover: '/smiling_portrait.png',
+    headline1: "I'M A UI/UX DESIGNER",
+    headline2: 'WHO DESIGNS ',
+    headline3: 'USER-CENTERED',
+    headline4: 'EXPERIENCES',
+    subtext: 'Over 5 years turning user research into interfaces that move real numbers — across civic-tech, fintech and mental health.',
+    cta1Label: 'View My Work',
+    cta1Href: '#/projects',
+    cta2Label: 'Get In Touch',
+    cta2Href: '#/contact',
+    stats: [
+      { value: '5+', label: 'Years of experience' },
+      { value: '89%', label: 'Voter turnout lifted at Voterix' },
+      { value: '1,939', label: 'Students served via GoChow' },
+      { value: '4', label: 'End-to-end product case studies' },
+    ],
   },
-  marquee: [
-    'https://motionsites.ai/assets/hero-space-voyage-preview-eECLH3Yc.gif',
-    'https://motionsites.ai/assets/hero-codenest-preview-Cgppc2qV.gif',
-    'https://motionsites.ai/assets/hero-vex-ventures-preview-BczMFIiw.gif',
-    'https://motionsites.ai/assets/hero-stellar-ai-v2-preview-DjvxjG3C.gif',
-    'https://motionsites.ai/assets/hero-asme-preview-B_nGDnTP.gif',
-    'https://motionsites.ai/assets/hero-transform-data-preview-Cx5OU29N.gif',
-    'https://motionsites.ai/assets/hero-vitara-preview-Cjz2QYyU.gif',
-    'https://motionsites.ai/assets/hero-terra-preview-BFjrCr7T.gif',
-    'https://motionsites.ai/assets/hero-skyelite-preview-DHaZIgUv.gif',
-    'https://motionsites.ai/assets/hero-aethera-preview-DknSlcTa.gif',
+  expertise: [
+    { title: 'User Research', body: 'Interviews, surveys, and usability testing that turn assumptions into evidence before a single pixel is placed.' },
+    { title: 'UI/UX Design', body: 'Low-fidelity wireframes to high-fidelity, component-based prototypes in Figma — built to hand off clean.' },
+    { title: 'Testing & Iteration', body: 'Moderated usability testing and iteration on flows, labels, and copy until the right action is the obvious one.' },
   ],
+  featuredProjects: [
+    {
+      name: 'Voterix',
+      href: '#/case/voterix',
+      headline: 'Making campus voting so simple people actually vote',
+      role: 'Founder & Product Designer',
+      stats: [
+        { before: '50%', after: '89%', label: 'Voter turnout · NUAMS' },
+        { before: '500', after: '596', label: 'Voters · NACOS' },
+      ],
+    },
+    {
+      name: 'Health4Moni',
+      href: '#/case/health4moni',
+      headline: 'Turning a confusing insurance sign-up into a checkout people finish',
+      role: 'Product Designer (Intern)',
+      stats: [
+        { before: 'Low-fi', after: 'Hi-fi', label: 'Prototype fidelity' },
+        { before: '0', after: '5', label: 'Users usability-tested' },
+      ],
+    },
+  ],
+  testimonials: [
+    {
+      name: 'Placeholder Name',
+      role: 'Role, Company',
+      quote: '"Placeholder testimonial — swap in a real quote from a teammate, client, or user once you have one."',
+    },
+    {
+      name: 'Placeholder Name',
+      role: 'Role, Company',
+      quote: '"Another placeholder — add a second testimonial here once you have feedback to share."',
+    },
+  ],
+  faqs: [
+    { question: 'What does your design process look like?', answer: "I start by framing the problem — stakeholder interviews, heuristic and competitive audits — before touching a wireframe. Then personas, journey maps, and user flows ground the design in real needs, and I validate every version with moderated usability testing before handoff." },
+    { question: 'What tools do you design with?', answer: 'Figma and FigJam for design and collaboration, with Maze and Google Forms for testing and surveys.' },
+    { question: 'Do you only design, or do you also think about the business side?', answer: "Both — as a startup COO I've owned product and operations end to end, so I design with an eye on the metric a screen is meant to move, not just how it looks." },
+    { question: 'Are you open to freelance or full-time roles?', answer: "Yes to both. Reach out on the Contact page and I'll get back to you quickly." },
+  ],
+  footer: {
+    cta: "LET'S TALK!",
+    email: 'olaniyiojedokun24@gmail.com',
+    copyright: '© Ojedokun Olaniyi — 2026',
+    links: [
+      { label: 'LinkedIn', href: 'https://www.linkedin.com/in/olaniyi-ojedokun' },
+      { label: 'Email', href: 'mailto:olaniyiojedokun24@gmail.com' },
+      { label: 'Phone', href: 'tel:+2349135382861' },
+    ],
+  },
   about: {
-    title: 'About me',
-    description: "With more than five years of experience in product design, i focus on user research, UI systems, and high-fidelity interaction design. I build clean, high-performance interfaces that connect businesses with their users.",
-    decorMoon: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/moon_icon.11395d36.png',
-    decorP59: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/p59_1.4659672e.png',
-    decorLego: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/lego_icon-1.703bb594.png',
-    decorGroup: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/Group_134-1.2e04f3ce.png',
-    skills: ['UI/UX Design', 'Interaction Systems', 'Information Architecture', 'User Research', 'Framer Motion', 'Product Strategy'],
-    timeline: [
-      {
-        year: '2024 - Present',
-        role: 'Senior Product Designer',
-        company: 'Voterix Tech',
-        description: 'Led user research and logic workflows for the Voterix platform, introducing accessible UI architectures that improved voter registration rates by 40%.'
-      },
-      {
-        year: '2022 - 2024',
-        role: 'UI/UX Designer',
-        company: 'Electify Lab',
-        description: 'Designed interactive civic dashboards and logic wireframes for government and ngo clients.'
-      },
-      {
-        year: '2020 - 2022',
-        role: 'Product Designer',
-        company: 'DesignPro Studio',
-        description: 'Crafted design systems, visual mockups, and high-fidelity product prototypes for early stage startups.'
-      }
-    ]
+    introHeadline: 'HI THERE,\nthis is me\nOjedokun\nOlaniyi',
+    bio: "UI/UX designer who starts with the user and ends with the metric. I turn user interviews, usability tests, and survey data into clean, accessible interfaces, then test with real people and iterate until the right action becomes the obvious one. I've designed end-to-end in Figma across health-insurance, civic-tech, and mental-health products, and as a startup COO I've watched good design move real numbers. I care most about designing for the users everyone else leaves out.",
+    portraitUrl: '',
   },
-  services: [
-    {
-      num: '01',
-      name: 'User Research',
-      desc: 'Conducting deep user interviews, mapping persona logic, and building information architecture to guide product decisions.',
-    },
-    {
-      num: '02',
-      name: 'Interaction Design',
-      desc: 'Creating high-fidelity, interactive animations and transitions that make product workflows clear, responsive, and delightful.',
-    },
-    {
-      num: '03',
-      name: 'Design Systems',
-      desc: 'Structuring unified tokens, component systems, and documentation guidelines that enable fast, scalable developer handoff.',
-    },
+  experience: [
+    { role: 'Chief Operating Officer', org: 'GoChow', dates: 'Sept 2024 – Present', blurb: 'Own the product experience for a campus food-delivery startup serving 1,939 students. Redesigned the ordering flow, cutting average delivery time to under 30 minutes and growing daily orders to ~50/day.' },
+    { role: 'Product Design Lead', org: 'Google Developer Groups on Campus, Bowen University', dates: 'Oct 2025 – Jul 2026', blurb: "Lead product design for the campus chapter — running seminars, webinars, and workshops that grow members' UX research and UI skills, and mentoring designers through real-world briefs." },
+    { role: 'Product Design Co-Lead', org: 'GDGoC, Bowen University', dates: 'Oct 2024 – Jul 2025', blurb: 'Co-taught and mentored the design committee and helped shape its training curriculum from the ground up.' },
+    { role: 'Product Designer (Intern)', org: 'Health4Moni', dates: 'Sept 2023 – Aug 2024', blurb: 'End-to-end product design engagement for a health-insurance company — from stakeholder interviews and audits to a high-fidelity prototype, validated with usability testing.' },
   ],
-  projects: [
+  caseStudies: [
     {
-      num: '01',
-      category: 'Civic Tech',
-      name: 'Voterix App',
-      col1img1:
-        'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055344_5eff02e0-87a5-41ce-b64f-eb08da8f33db.png&w=1280&q=85',
-      col1img2:
-        'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055431_11d841fd-8b41-46a5-82e4-b04f2407a7d8.png&w=1280&q=85',
-      col2img:
-        'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png&w=1280&q=85',
-      description: 'An accessible mobile voting registry helping citizens find polling places, review candidate backgrounds, and securely check registration statuses.',
-      role: 'Lead UI/UX Designer',
-      tools: ['Figma', 'React', 'Framer Motion'],
-      liveUrl: 'https://voterix.org',
-      template_type: 'casestudy',
-      problem_statement: 'Voter registration platforms are frequently dense and difficult to navigate on mobile devices, leading to lower engagement rates among young voters.',
-      research_insights: [
-        '70% of respondents browse civic info exclusively via mobile viewports.',
-        'Users abandon registration if forms require more than three multi-step segments.',
-        'Simplified color tokens and progress indicators reduce cognitive load by 25%.'
+      slug: 'mindvox',
+      category: 'Mental Health Platform',
+      headline: 'A Pidgin-first, judgment-free first step into mental health support',
+      stats: [{ val: 'Anon.', label: 'Entry model' }, { val: 'Offline-first', label: 'Network resilience' }, { val: 'Pidgin', label: 'Primary language' }],
+      role: 'Lead Product Designer',
+      timeline: '2026 Capstone',
+      categoryTag: 'Mental Health',
+      problem: 'Nigerian university students face rising social anxiety but struggle to seek help: stigma, language barriers (existing platforms use English jargon), and lack of affordable, confidential support. Many suffer in silence rather than risk judgment.',
+      process: [
+        { title: 'Deep Empathy Research', body: 'Conducted 12 in-depth interviews with students dealing with social anxiety. Listened for language preferences, trust barriers, and what would make them feel safe seeking help anonymously.' },
+        { title: 'Conversational UI Design', body: 'Designed a Pidgin-first, conversational triage flow. Users answer natural-language questions about their feelings; the app assesses severity and routes them to appropriate support (peer, counselor, or crisis).' },
+        { title: 'Validation & Iteration', body: 'Ran moderated usability tests with 8 students; refined tone, conversation pacing, and referral screens. Built offline-first so students can use it anywhere, anytime.' },
       ],
-      process_gallery: [
-        'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055654_911201c5-36d9-4bc6-bac7-331adfce159f.png&w=1280&q=85',
-        'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055723_5ceda0b8-d9c2-4665-b2e3-83ba19ba76d1.png&w=1280&q=85'
-      ],
-      solution_features: [
-        {
-          title: '3-Step Easy Registration',
-          description: 'A structured workflow utilizing verified government API endpoints to index data in seconds.',
-          image_url: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055451_e317bf2d-28d4-48cc-86b0-6f72f25b6327.png&w=1280&q=85'
-        }
-      ],
-      success_metrics: [
-        '📈 Increased voter turnout by 40%.'
-      ]
+      outcomes: [{ val: '100%', label: 'Completion rate (testing)' }, { val: '8/8', label: 'Users felt safe' }, { val: 'Ready', label: 'For deployment' }],
+      behanceUrl: 'https://behance.net',
+      coverImageUrl: '',
+      processImageUrl: '',
     },
     {
-      num: '02',
-      category: 'Visual Design',
-      name: 'Glassmorphic HUD',
-      col1img1:
-        'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055654_911201c5-36d9-4bc6-bac7-331adfce159f.png&w=1280&q=85',
-      col1img2:
-        'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055723_5ceda0b8-d9c2-4665-b2e3-83ba19ba76d1.png&w=1280&q=85',
-      col2img:
-        'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055753_adc5dcbd-a8e6-49c0-b43a-9b030d835cea.png&w=1280&q=85',
-      description: 'A design study on glassmorphic HUD interfaces incorporating real-time ambient lighting and neon highlights.',
-      role: 'UI Designer',
-      tools: ['Figma', 'Photoshop'],
-      liveUrl: '',
-      template_type: 'visual',
-      media_url: 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260412_055753_adc5dcbd-a8e6-49c0-b43a-9b030d835cea.png&w=1280&q=85',
-      brief_context: 'Created to evaluate user reaction speeds against glass-textured UI layers and bright, glowing outline parameters.',
-      design_system: {
-        colors: ['#8B5CF6', '#10B981', '#0C0C0C'],
-        typography: ['Kanit Black', 'Inter Medium']
-      }
-    }
+      slug: 'voterix',
+      category: 'Campus Voting Platform',
+      headline: 'Making campus voting so simple people actually vote',
+      stats: [{ val: '89%', label: 'Voter turnout (NUAMS)' }, { val: '50% → 89%', label: 'Growth from baseline' }, { val: '6 → 3', label: 'Steps to cast a vote' }],
+      role: 'Founder & Product Designer',
+      timeline: '2025 – Present',
+      categoryTag: 'Civic-Tech',
+      problem: 'Campus elections had a 50% voter turnout. Students cited friction points: the ballot flow was long, confusing, and happened during exam season when time was scarce. Every extra step meant more people dropping off.',
+      process: [
+        { title: 'Research & Interviews', body: 'Surveyed 50+ students and ran one-on-one interviews to understand voting barriers. Found time scarcity and ballot complexity were the main friction.' },
+        { title: 'Wireframing & Testing', body: 'Mapped the current 6-step flow, identified drop-off points, and tested a streamlined 3-step prototype with 8 users. Task completion jumped to 95%.' },
+        { title: 'Visual Design & Launch', body: 'Built a clean, mobile-first interface emphasizing clarity. Launched for NUAMS election; final turnout: 89%.' },
+      ],
+      outcomes: [{ val: '89%', label: 'Voter turnout on launch' }, { val: '39pt', label: 'Increase from baseline' }, { val: '3', label: 'Associations adopted the platform' }],
+      behanceUrl: 'https://behance.net',
+      coverImageUrl: '',
+      processImageUrl: '',
+    },
+    {
+      slug: 'health4moni',
+      category: 'Fintech / Insurance',
+      headline: 'Turning a confusing insurance sign-up into a checkout people finish',
+      stats: [{ val: '5', label: 'Users usability-tested' }, { val: 'Low-fi → Hi-fi', label: 'Prototype progression' }, { val: '9', label: 'Screens designed' }],
+      role: 'Product Designer (Intern)',
+      timeline: 'Sept 2023 – Aug 2024',
+      categoryTag: 'Insurance Platform',
+      problem: "Health4Moni's online insurance platform had low conversion: customers dropped off during sign-up, KYC verification, and plan comparison. The flow was unclear, jargon-heavy, and lacked trust signals. No one knew where they were in the process.",
+      process: [
+        { title: 'Stakeholder Interviews & Audit', body: 'Ran interviews with product, underwriting, and support teams. Conducted a competitive audit of 5 insurance platforms and heuristic evaluation of the existing flow.' },
+        { title: 'Journey Mapping & Personas', body: 'Synthesized research into a customer journey map (pain points at each stage) and 3 personas. Identified clarity, trust, and progress tracking as key needs.' },
+        { title: 'Iterative Design & Testing', body: 'Low-fi wireframes for 9 key screens, then hi-fi prototypes. Ran moderated usability tests with 5 users; reworked sign-in, KYC, and checkout flows based on feedback before developer handoff.' },
+      ],
+      outcomes: [{ val: '9', label: 'Full-featured screens delivered' }, { val: '95%', label: 'Task completion in testing' }, { val: 'Ready', label: 'For dev handoff' }],
+      behanceUrl: 'https://behance.net',
+      coverImageUrl: '',
+      processImageUrl: '',
+    },
+    {
+      slug: 'gaffer',
+      category: 'Sports-Tech Platform',
+      headline: 'Giving local competitions the fixtures & fantasy experience big leagues get',
+      stats: [{ val: '300+', label: 'Students onboarded' }, { val: '3 wks', label: 'Bowen Fans League pilot' }, { val: 'Mobile-first', label: 'Design approach' }],
+      role: 'Founder & Product Designer',
+      timeline: '2025 – Present',
+      categoryTag: 'Fantasy Sports',
+      problem: 'Local sports organizers had no platform to manage competitions or engage fans. Fixture info was scattered across WhatsApp; standings were manual; there was zero engagement or gamification. Players and fans had no reason to return.',
+      process: [
+        { title: 'User Research', body: 'Surveyed 20+ organizers and fans; identified that live updates, standings visibility, and a fantasy layer (pick players, earn points) were the top wants.' },
+        { title: 'Mobile-First Design', body: 'Designed fixtures, live scores, player profiles, and fantasy gameplay for mobile. All core flows tested for clarity and speed on low-end devices.' },
+        { title: 'Iterate & Launch', body: 'Piloted with 300+ students in the Bowen Fans League. Observed onboarding drop-off and refined the signup flow; refined fantasy mechanics based on user feedback.' },
+      ],
+      outcomes: [{ val: '300+', label: 'Active users in pilot' }, { val: '85%', label: 'Return rate (week 2)' }, { val: 'Live', label: 'Ready to scale' }],
+      behanceUrl: 'https://behance.net',
+      coverImageUrl: '',
+      processImageUrl: '',
+    },
   ],
 }
 
-interface PortfolioContextType {
-  data: PortfolioData
-  updateHero: (hero: Partial<HeroData>) => void
-  updateAbout: (about: Partial<AboutData>) => void
-  updateService: (index: number, service: Partial<ServiceData>) => void
-  addService: (service: ServiceData) => void
-  deleteService: (index: number) => void
-  updateProject: (index: number, project: Partial<ProjectData>) => void
-  addProject: (project: ProjectData) => void
-  deleteProject: (index: number) => void
-  updateMarquee: (images: string[]) => void
-  resetToDefault: () => void
+/* ─────────────────────────────────────────────
+   CONTEXT
+───────────────────────────────────────────── */
+interface CtxType {
+  data: PortfolioContent
+  set: (patch: Partial<PortfolioContent>) => void
+  setNested: <K extends keyof PortfolioContent>(key: K, val: PortfolioContent[K]) => void
+  reset: () => void
 }
 
-const PortfolioContext = createContext<PortfolioContextType | undefined>(undefined)
+const Ctx = createContext<CtxType | undefined>(undefined)
 
 export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [data, setData] = useState<PortfolioData>(() => {
-    const saved = localStorage.getItem('portfolio_data')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        // Backwards compatibility for projects schema updates
-        const updatedProjects = (parsed.projects || []).map((p: any) => {
-          const base = {
-            tools: p.tools || [],
-            ...p
-          }
-          if (base.template_type === 'casestudy' || !base.template_type) {
-            return {
-              template_type: 'casestudy',
-              problem_statement: base.problem_statement || base.challenge || '',
-              research_insights: base.research_insights || [],
-              process_gallery: base.process_gallery || (base.col1img1 ? [base.col1img1] : []),
-              solution_features: base.solution_features || [],
-              success_metrics: base.success_metrics || [],
-              ...base,
-            }
-          } else {
-            return {
-              template_type: 'visual',
-              media_url: base.media_url || base.col2img || '',
-              brief_context: base.brief_context || base.description || '',
-              design_system: base.design_system || { colors: [], typography: [] },
-              ...base,
-            }
-          }
-        })
-        
-        return {
-          ...defaultPortfolioData,
-          ...parsed,
-          hero: {
-            ...defaultPortfolioData.hero,
-            ...parsed.hero,
-          },
-          about: {
-            ...defaultPortfolioData.about,
-            ...parsed.about,
-          },
-          projects: updatedProjects.length > 0 ? updatedProjects : defaultPortfolioData.projects,
-        }
-      } catch (e) {
-        console.error('Error parsing portfolio_data from localStorage', e)
-      }
-    }
-    return defaultPortfolioData
+  const [data, setData] = useState<PortfolioContent>(() => {
+    try {
+      const raw = localStorage.getItem('portfolio_v2')
+      if (raw) return { ...DEFAULT, ...JSON.parse(raw) }
+    } catch {}
+    return DEFAULT
   })
 
   useEffect(() => {
-    localStorage.setItem('portfolio_data', JSON.stringify(data))
+    try {
+      localStorage.setItem('portfolio_v2', JSON.stringify(data))
+    } catch (e) {
+      console.error('LocalStorage quota exceeded or other error saving data', e)
+      alert('Error saving data! An image you uploaded might be too large. Try uploading a smaller image.')
+    }
   }, [data])
 
-  const updateHero = (hero: Partial<HeroData>) => {
-    setData((prev) => ({
-      ...prev,
-      hero: { ...prev.hero, ...hero },
-    }))
-  }
+  const set = (patch: Partial<PortfolioContent>) =>
+    setData(prev => ({ ...prev, ...patch }))
 
-  const updateAbout = (about: Partial<AboutData>) => {
-    setData((prev) => ({
-      ...prev,
-      about: { ...prev.about, ...about },
-    }))
-  }
+  const setNested = <K extends keyof PortfolioContent>(key: K, val: PortfolioContent[K]) =>
+    setData(prev => ({ ...prev, [key]: val }))
 
-  const updateService = (index: number, service: Partial<ServiceData>) => {
-    setData((prev) => {
-      const updatedServices = [...prev.services]
-      updatedServices[index] = { ...updatedServices[index], ...service }
-      return { ...prev, services: updatedServices }
-    })
-  }
+  const reset = () => setData(DEFAULT)
 
-  const addService = (service: ServiceData) => {
-    setData((prev) => ({
-      ...prev,
-      services: [...prev.services, service],
-    }))
-  }
-
-  const deleteService = (index: number) => {
-    setData((prev) => ({
-      ...prev,
-      services: prev.services.filter((_, i) => i !== index),
-    }))
-  }
-
-  const updateProject = (index: number, project: Partial<ProjectData>) => {
-    setData((prev) => {
-      const updatedProjects = [...prev.projects]
-      updatedProjects[index] = { ...updatedProjects[index], ...project } as ProjectData
-      return { ...prev, projects: updatedProjects }
-    })
-  }
-
-  const addProject = (project: ProjectData) => {
-    setData((prev) => ({
-      ...prev,
-      projects: [...prev.projects, project],
-    }))
-  }
-
-  const deleteProject = (index: number) => {
-    setData((prev) => ({
-      ...prev,
-      projects: prev.projects.filter((_, i) => i !== index),
-    }))
-  }
-
-  const updateMarquee = (images: string[]) => {
-    setData((prev) => ({
-      ...prev,
-      marquee: images,
-    }))
-  }
-
-  const resetToDefault = () => {
-    setData(defaultPortfolioData)
-  }
-
-  return (
-    <PortfolioContext.Provider
-      value={{
-        data,
-        updateHero,
-        updateAbout,
-        updateService,
-        addService,
-        deleteService,
-        updateProject,
-        addProject,
-        deleteProject,
-        updateMarquee,
-        resetToDefault,
-      }}
-    >
-      {children}
-    </PortfolioContext.Provider>
-  )
+  return <Ctx.Provider value={{ data, set, setNested, reset }}>{children}</Ctx.Provider>
 }
 
 export const usePortfolio = () => {
-  const context = useContext(PortfolioContext)
-  if (!context) {
-    throw new Error('usePortfolio must be used within a PortfolioProvider')
-  }
-  return context
+  const c = useContext(Ctx)
+  if (!c) throw new Error('usePortfolio must be inside PortfolioProvider')
+  return c
 }
+
+// Legacy stub for AdminPanel import compatibility
+export type { PortfolioContent as PortfolioData }

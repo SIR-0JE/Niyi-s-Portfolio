@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</helmet>
+<div style="position:relative;width:100%;background:rgb(1,2,8);padding:28px clamp(24px,5vw,100px);display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:24px;box-sizing:border-box;font-family:'Poppins',sans-serif;flex-wrap:wrap;">
+  <a href="Home.dc.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+    <svg width="34" height="24" viewBox="0 0 46 32" style="flex-shrink:0;">
+      <rect x="0" y="0" width="9.5" height="32" rx="0" fill="white"></rect>
+      <rect x="23.7" y="0" width="9.5" height="32" rx="0" fill="white"></rect>
+      <circle cx="16.6" cy="7.1" r="5.9" fill="rgb(255,128,74)"></circle>
+      <circle cx="40.3" cy="24.9" r="5.9" fill="rgb(255,128,74)"></circle>
+    </svg>
+    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:rgb(255,255,255);white-space:nowrap;">OJEDOKUN</span>
+  </a>
+  <div style="display:flex;flex-direction:row;align-items:center;gap:40px;flex-wrap:wrap;">
+    <sc-for list="{{ links }}" as="link" hint-placeholder-count="4">
+      <a href="{{ link.href }}" style="font-family:'Syne',sans-serif;font-weight:{{ link.weight }};font-size:18px;color:{{ link.color }};text-decoration:none;white-space:nowrap;">{{ link.label }}</a>
+    </sc-for>
+  </div>
+  <a href="mailto:olaniyiojedokun24@gmail.com" style="flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:10px 24px;border-radius:100px;border:1.5px solid rgb(255,255,255);font-family:'Syne',sans-serif;font-weight:600;font-size:14px;letter-spacing:0.04em;color:rgb(255,255,255);text-decoration:none;white-space:nowrap;">HIRE ME</a>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;active&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;Home&quot;, &quot;options&quot;: [&quot;Home&quot;,&quot;About&quot;,&quot;Projects&quot;,&quot;Contact&quot;], &quot;tsType&quot;: &quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active || 'Home';
+    const items = [
+      { label: 'Home', href: 'Home.dc.html' },
+      { label: 'About', href: 'About.dc.html' },
+      { label: 'Projects', href: 'Projects.dc.html' },
+      { label: 'Contact', href: 'Contact.dc.html' },
+    ];
+    const links = items.map(it => ({
+      ...it,
+      color: it.label === active ? 'rgb(255,128,74)' : 'rgb(203,203,203)',
+      weight: it.label === active ? 700 : 500,
+    }));
+    return { links };
+  }
+}
+
+</script>
+</body>
+</html>

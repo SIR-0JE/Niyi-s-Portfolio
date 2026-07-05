@@ -1,62 +1,99 @@
-import React, { useState } from 'react'
-import FadeIn from '../components/FadeIn'
-import Magnet from '../components/Magnet'
-import { Mail, ArrowUpRight } from 'lucide-react'
+import { useRef } from 'react'
+import { motion, useInView, useScroll, useTransform } from 'framer-motion'
 
-const FooterCTA: React.FC = () => {
-  const [hovered, setHovered] = useState(false)
+/* ─── Letter-by-letter reveal for big CTA text ───────────────────────── */
+function BigText({ text }: { text: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, amount: 0.4 })
 
   return (
-    <section
-      id="contact-footer"
-      className="bg-[#0C0C0C] text-[#D7E2EA] px-5 sm:px-8 md:px-12 lg:px-16 py-32 sm:py-40 border-t border-neutral-900 relative overflow-hidden flex flex-col items-center justify-center min-h-[60vh]"
-    >
-      {/* Dynamic Radial Glow Background */}
-      <div 
-        className="absolute w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] rounded-full pointer-events-none transition-all duration-700 blur-[120px]"
-        style={{
-          background: hovered 
-            ? 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0) 70%)'
-            : 'radial-gradient(circle, rgba(139,92,246,0.04) 0%, rgba(139,92,246,0) 70%)',
-          transform: 'translate(-50%, -50%)',
-          top: '50%',
-          left: '50%'
-        }}
-      />
-
-      <div className="max-w-4xl mx-auto flex flex-col items-center gap-10 sm:gap-14 text-center z-10">
-        
-        {/* Massive Headline */}
-        <FadeIn delay={0} y={30}>
-          <h2 
-            className="hero-heading font-black uppercase leading-none tracking-tight font-sans max-w-3xl"
-            style={{ fontSize: 'clamp(2.2rem, 7.5vw, 95px)' }}
+    <div ref={ref} className="overflow-hidden" aria-label={text}>
+      <div className="flex flex-wrap justify-center">
+        {text.split('').map((ch, i) => (
+          <motion.span
+            key={i}
+            initial={{ y: '110%' }}
+            animate={inView ? { y: 0 } : {}}
+            transition={{ duration: 0.55, delay: i * 0.025, ease: [0.16, 1, 0.3, 1] }}
+            className="inline-block font-display font-black text-text"
+            style={{
+              fontSize: 'clamp(3.5rem, 11vw, 9rem)',
+              lineHeight: 0.88,
+              letterSpacing: '-0.03em',
+            }}
           >
-            Let's build something that matters.
-          </h2>
-        </FadeIn>
-
-        {/* Magnetic Email CTA Button */}
-        <FadeIn delay={0.2} y={30}>
-          <Magnet strength={30}>
-            <a
-              href="mailto:niyi.designer@example.com"
-              onMouseEnter={() => setHovered(true)}
-              onMouseLeave={() => setHovered(false)}
-              className="group flex items-center gap-3 px-10 py-5 rounded-full bg-purple-600 border border-purple-500 text-white text-base sm:text-lg font-bold uppercase tracking-widest hover:bg-purple-700 hover:shadow-[0_0_25px_rgba(168,85,247,0.4)] transition-all duration-300 cursor-pointer"
-            >
-              <Mail size={18} />
-              <span>Get In Touch</span>
-              <ArrowUpRight 
-                size={18} 
-                className="transition-transform duration-300 group-hover:translate-x-1.5 group-hover:-translate-y-1.5" 
-              />
-            </a>
-          </Magnet>
-        </FadeIn>
+            {ch === ' ' ? '\u00A0' : ch}
+          </motion.span>
+        ))}
       </div>
-    </section>
+    </div>
   )
 }
 
-export default FooterCTA
+export default function FooterCTA() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const footerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] })
+  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '14%'])
+  const inView = useInView(footerRef, { once: true, amount: 0.2 })
+
+  return (
+    <>
+      {/* ── CTA ── */}
+      <section ref={sectionRef} className="py-32 border-t border-brd relative overflow-hidden text-center" id="contact">
+        {/* Parallax glow */}
+        <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-orange/[0.07] blur-[100px]" />
+        </motion.div>
+
+        <div className="wrap relative z-10">
+          <BigText text="LET'S TALK!" />
+
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mt-5 font-mono text-[0.62rem] tracking-[0.18em] uppercase text-muted"
+          >
+            olaniyiojedokun24@gmail.com
+          </motion.p>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="border-t border-brd py-7" ref={footerRef}>
+        <div className="wrap flex flex-col sm:flex-row items-center justify-between gap-3">
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.6 }}
+            className="font-mono text-[0.58rem] tracking-[0.14em] uppercase text-muted"
+          >
+            Olaniyi · Ibadan, NG
+          </motion.span>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="flex gap-6"
+          >
+            {[
+              { label: 'LinkedIn', href: '#' },
+              { label: 'Twitter', href: '#' },
+              { label: 'Email', href: 'mailto:olaniyiojedokun24@gmail.com' },
+            ].map(s => (
+              <a
+                key={s.label}
+                href={s.href}
+                className="font-mono text-[0.58rem] tracking-[0.14em] uppercase text-muted hover:text-orange transition-colors duration-200"
+              >
+                {s.label}
+              </a>
+            ))}
+          </motion.div>
+        </div>
+      </footer>
+    </>
+  )
+}

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-direction:column;gap:0;background:rgb(1,2,8);color:rgb(255,255,255);font-family:'Poppins',sans-serif;min-height:100vh;box-sizing:border-box;">
+  <!-- NAVBAR -->
+  <dc-import name="Navbar" hint-size="100%,80px"></dc-import>
+  
+  <!-- HERO IMAGE -->
+  <div style="padding:64px clamp(24px,5vw,100px);box-sizing:border-box;">
+    <div style="max-width:1240px;margin:0 auto;width:100%;height:400px;border-radius:20px;background:linear-gradient(135deg, rgba(255,128,74,0.2), rgba(255,128,74,0.05));border:1px solid rgba(255,128,74,0.2);display:flex;align-items:center;justify-content:center;">
+      <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:16px;color:rgb(203,203,203);">Project hero image — add your screenshot here</span>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div style="padding:96px clamp(24px,5vw,100px) 64px;display:flex;flex-direction:column;gap:32px;box-sizing:border-box;">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:32px;">
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <span style="font-family:'Syne',sans-serif;font-weight:500;font-size:16px;letter-spacing:0.08em;color:rgb(255,128,74);text-transform:uppercase;">Campus Voting Platform</span>
+        <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(36px,5vw,56px);line-height:1.15;color:rgb(255,255,255);">Making campus voting so simple people actually vote</span>
+      </div>
+      <div style="display:flex;flex-direction:row;gap:48px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,0.1);padding-top:32px;">
+        <div style="flex:1 1 180px;display:flex;flex-direction:column;gap:6px;">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:32px;color:rgb(255,128,74);">89%</span>
+          <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:14px;color:rgb(203,203,203);">Voter turnout (NUAMS)</span>
+        </div>
+        <div style="flex:1 1 180px;display:flex;flex-direction:column;gap:6px;">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:32px;color:rgb(255,128,74);">50% → 89%</span>
+          <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:14px;color:rgb(203,203,203);">Growth from baseline</span>
+        </div>
+        <div style="flex:1 1 180px;display:flex;flex-direction:column;gap:6px;">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:32px;color:rgb(255,128,74);">6 → 3</span>
+          <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:14px;color:rgb(203,203,203);">Steps to cast a vote</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTEXT -->
+  <div style="padding:64px clamp(24px,5vw,100px);display:flex;flex-direction:column;gap:48px;box-sizing:border-box;border-top:1px solid rgba(255,255,255,0.1);">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:48px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:48px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;letter-spacing:0.08em;color:rgb(203,203,203);text-transform:uppercase;">Role</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:18px;color:rgb(255,255,255);">Founder & Product Designer</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;letter-spacing:0.08em;color:rgb(203,203,203);text-transform:uppercase;">Timeline</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:18px;color:rgb(255,255,255);">2025 – Present</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <span style="font-family:'Poppins',sans-serif;font-weight:600;font-size:11px;letter-spacing:0.08em;color:rgb(203,203,203);text-transform:uppercase;">Category</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:18px;color:rgb(255,255,255);">Civic-Tech</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEM -->
+  <div style="padding:64px clamp(24px,5vw,100px);display:flex;flex-direction:column;gap:32px;box-sizing:border-box;border-top:1px solid rgba(255,255,255,0.1);">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:24px;">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:32px;color:rgb(255,255,255);">The Problem</span>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <p style="font-family:'Poppins',sans-serif;font-weight:400;font-size:16px;line-height:1.7;color:rgb(203,203,203);max-width:720px;margin:0;">Campus elections had a 50% voter turnout. Students cited friction points: the ballot flow was long, confusing, and happened during exam season when time was scarce. Every extra step meant more people dropping off.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROCESS IMAGE -->
+  <div style="padding:0 clamp(24px,5vw,100px) 64px;box-sizing:border-box;">
+    <div style="max-width:1240px;margin:0 auto;width:100%;height:400px;border-radius:20px;background:linear-gradient(135deg, rgba(255,128,74,0.2), rgba(255,128,74,0.05));border:1px solid rgba(255,128,74,0.2);display:flex;align-items:center;justify-content:center;">
+      <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:16px;color:rgb(203,203,203);">Process / wireframes image — add your design work here</span>
+    </div>
+  </div>
+
+  <!-- PROCESS -->
+  <div style="padding:64px clamp(24px,5vw,100px);display:flex;flex-direction:column;gap:32px;box-sizing:border-box;border-top:1px solid rgba(255,255,255,0.1);">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:24px;">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:32px;color:rgb(255,255,white);">The Process</span>
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:flex;flex-direction:row;gap:16px;align-items:flex-start;">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:rgb(255,128,74);flex-shrink:0;">1</span>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:18px;color:rgb(255,255,255);">Research & Interviews</span>
+            <p style="font-family:'Poppins',sans-serif;font-weight:400;font-size:15px;line-height:1.6;color:rgb(203,203,203);margin:0;">Surveyed 50+ students and ran one-on-one interviews to understand voting barriers. Found time scarcity and ballot complexity were the main friction.</p>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:row;gap:16px;align-items:flex-start;">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:rgb(255,128,74);flex-shrink:0;">2</span>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:18px;color:rgb(255,255,255);">Wireframing & Testing</span>
+            <p style="font-family:'Poppins',sans-serif;font-weight:400;font-size:15px;line-height:1.6;color:rgb(203,203,203);margin:0;">Mapped the current 6-step flow, identified drop-off points, and tested a streamlined 3-step prototype with 8 users. Task completion jumped to 95%.</p>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:row;gap:16px;align-items:flex-start;">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:rgb(255,128,74);flex-shrink:0;">3</span>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:18px;color:rgb(255,255,255);">Visual Design & Launch</span>
+            <p style="font-family:'Poppins',sans-serif;font-weight:400;font-size:15px;line-height:1.6;color:rgb(203,203,203);margin:0;">Built a clean, mobile-first interface emphasizing clarity. Launched for NUAMS election; final turnout: 89%.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTCOME -->
+  <div style="padding:64px clamp(24px,5vw,100px);display:flex;flex-direction:column;gap:32px;box-sizing:border-box;border-top:1px solid rgba(255,255,255,0.1);">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:24px;">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:32px;color:rgb(255,255,255);">The Outcome</span>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:32px;">
+        <div style="display:flex;flex-direction:column;gap:8px;padding:24px;border-radius:16px;background:rgba(255,128,74,0.1);border:1px solid rgba(255,128,74,0.2);">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:28px;color:rgb(255,128,74);">89%</span>
+          <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);">Voter turnout on launch</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:24px;border-radius:16px;background:rgba(255,128,74,0.1);border:1px solid rgba(255,128,74,0.2);">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:28px;color:rgb(255,128,74);">39pt</span>
+          <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);">Increase from baseline</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:24px;border-radius:16px;background:rgba(255,128,74,0.1);border:1px solid rgba(255,128,74,0.2);">
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:28px;color:rgb(255,128,74);">3</span>
+          <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:14px;color:rgb(203,203,203);">Associations adopted the platform</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div style="padding:64px clamp(24px,5vw,100px);display:flex;flex-direction:column;gap:32px;box-sizing:border-box;border-top:1px solid rgba(255,255,255,0.1);">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:16px;align-items:flex-start;">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:28px;color:rgb(255,255,white);">See the full project</span>
+      <a href="https://behance.net" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;padding:16px 32px;border-radius:100px;background:rgb(255,128,74);font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:rgb(1,2,8);text-decoration:none;white-space:nowrap;">View on Behance ↗</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <dc-import name="Footer" style="margin-top:auto;" hint-size="100%,auto"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+
+</script>
+</body>
+</html>

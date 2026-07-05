@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="padding:64px clamp(24px,5vw,100px);display:flex;flex-direction:column;box-sizing:border-box;">
+  <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:40px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:rgb(203,203,203);">&#10038;</span>
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:40px;color:rgb(255,255,255);">What they say</span>
+    </div>
+    <div style="display:flex;flex-direction:row;gap:48px;flex-wrap:wrap;align-items:center;">
+      <div style="flex:0 0 auto;display:flex;flex-direction:row;gap:16px;align-items:center;min-width:220px;">
+        <div style="width:64px;height:64px;border-radius:50%;flex-shrink:0;background:repeating-linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1) 6px, rgba(255,255,255,0.03) 6px, rgba(255,255,255,0.03) 12px);"></div>
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:24px;color:rgb(255,255,255);">{{ current.name }}</span>
+          <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:16px;color:rgb(203,203,203);">{{ current.role }}</span>
+        </div>
+      </div>
+      <div style="flex:1 1 480px;position:relative;padding-top:24px;">
+        <span style="position:absolute;top:-24px;left:0;font-family:'Syne',sans-serif;font-weight:800;font-size:64px;color:rgba(203,203,203,0.35);line-height:1;">&#8220;</span>
+        <span style="display:block;font-family:'Syne',sans-serif;font-weight:500;font-size:28px;line-height:1.4;color:rgb(255,255,255);">{{ current.quote }}</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:row;gap:16px;justify-content:flex-end;">
+      <button onclick="{{ prev }}" aria-label="Previous testimonial" style="width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,0.1);color:rgb(255,255,255);font-family:'Syne',sans-serif;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#8592;</button>
+      <button onclick="{{ next }}" aria-label="Next testimonial" style="width:40px;height:40px;border-radius:50%;border:none;background:rgb(255,128,74);color:rgb(1,2,8);font-family:'Syne',sans-serif;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#8594;</button>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1200, &quot;height&quot;: 320}}">
+class Component extends DCLogic {
+  state = { index: 0 };
+
+  data = [
+    { name: 'Placeholder Name', role: 'Role, Company', quote: '\u201cPlaceholder testimonial \u2014 swap in a real quote from a teammate, client, or user once you have one.\u201d' },
+    { name: 'Placeholder Name', role: 'Role, Company', quote: '\u201cAnother placeholder quote \u2014 add a second testimonial here once you have feedback to share.\u201d' },
+  ];
+
+  renderVals() {
+    const i = this.state.index;
+    const n = this.data.length;
+    return {
+      current: this.data[i],
+      prev: () => this.setState({ index: (i - 1 + n) % n }),
+      next: () => this.setState({ index: (i + 1) % n }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

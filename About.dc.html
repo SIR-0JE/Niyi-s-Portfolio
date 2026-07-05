@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:rgb(1,2,8); }
+  ::selection { background:rgb(255,128,74); color:rgb(1,2,8); }
+</style>
+</helmet>
+<div data-screen-label="About" style="background:rgb(1,2,8);min-height:100vh;display:flex;flex-direction:column;">
+  <dc-import name="Navbar" active="About" style="position:relative;" hint-size="100%,88px"></dc-import>
+
+  <!-- INTRO -->
+  <div style="padding:96px clamp(24px,5vw,100px) 64px;box-sizing:border-box;">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:row;gap:48px;align-items:center;flex-wrap:wrap;">
+      <div style="flex:1 1 380px;display:flex;flex-direction:column;gap:20px;">
+        <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(32px,5vw,56px);line-height:1.15;color:rgb(255,255,255);">HI THERE,<br>this is me<br>Ojedokun<br>Olaniyi</span>
+        <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:18px;line-height:1.7;color:rgb(203,203,203);max-width:520px;">A product designer across civic-tech, fintech &amp; mental health. I find the friction, cut it, and move the numbers &mdash; from voter turnout to first-time access to care.</span>
+      </div>
+      <div style="flex:1 1 340px;min-height:420px;border-radius:20px;background:repeating-linear-gradient(135deg, rgba(255,128,74,0.12), rgba(255,128,74,0.12) 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;">
+        <span style="font-family:monospace;font-size:12px;color:rgba(255,255,255,0.5);">portrait photo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT ME LONG -->
+  <div style="padding:32px clamp(24px,5vw,100px) 64px;box-sizing:border-box;">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:row;gap:48px;flex-wrap:wrap;">
+      <span style="flex:0 0 auto;font-family:'Syne',sans-serif;font-weight:700;font-size:40px;color:rgb(255,255,255);">About me</span>
+      <span style="flex:1 1 480px;font-family:'Poppins',sans-serif;font-weight:400;font-size:16px;line-height:1.8;color:rgb(255,255,255);">UI/UX designer who starts with the user and ends with the metric. I turn user interviews, usability tests, and survey data into clean, accessible interfaces, then test with real people and iterate until the right action becomes the obvious one. I've designed end-to-end in Figma across health-insurance, civic-tech, and mental-health products, and as a startup COO I've watched good design move real numbers. I care most about designing for the users everyone else leaves out.</span>
+    </div>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <div style="padding:32px clamp(24px,5vw,100px) 64px;box-sizing:border-box;">
+    <div style="max-width:1240px;margin:0 auto;width:100%;display:flex;flex-direction:row;gap:48px;flex-wrap:wrap;">
+      <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:32px;">
+        <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:40px;color:rgb(255,255,255);">Experience</span>
+        <a download href="{{ cvHref }}" style="display:flex;align-items:center;justify-content:center;padding:16px 32px;border-radius:100px;background:rgb(255,128,74);font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:rgb(1,2,8);text-decoration:none;white-space:nowrap;width:fit-content;">Download CV</a>
+      </div>
+      <div style="flex:1 1 480px;display:flex;flex-direction:column;gap:28px;">
+        <sc-for list="{{ experience }}" as="job" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:6px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,0.1);">
+            <div style="display:flex;flex-direction:row;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+              <span style="font-family:'Syne',sans-serif;font-weight:600;font-size:22px;color:rgb(255,255,255);">{{ job.role }}</span>
+              <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:14px;color:rgb(203,203,203);white-space:nowrap;">{{ job.dates }}</span>
+            </div>
+            <span style="font-family:'Poppins',sans-serif;font-weight:500;font-size:16px;color:rgb(255,128,74);">{{ job.org }}</span>
+            <span style="font-family:'Poppins',sans-serif;font-weight:400;font-size:15px;line-height:1.6;color:rgb(203,203,203);">{{ job.blurb }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIAL -->
+  <dc-import name="Testimonial" style="position:relative;" hint-size="100%,320px"></dc-import>
+
+  <dc-import name="Footer" style="position:relative;" hint-size="100%,320px"></dc-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const experience = [
+      { role: 'Chief Operating Officer', org: 'GoChow', dates: 'Sept 2024 \u2013 Present', blurb: 'Own the product experience for a campus food-delivery startup serving 1,939 students. Redesigned the ordering flow, cutting average delivery time to under 30 minutes and growing daily orders to ~50/day.' },
+      { role: 'Product Design Lead', org: 'Google Developer Groups on Campus, Bowen University', dates: 'Oct 2025 \u2013 Jul 2026', blurb: 'Lead product design for the campus chapter \u2014 running seminars, webinars, and workshops that grow members\u2019 UX research and UI skills, and mentoring designers through real-world briefs.' },
+      { role: 'Product Design Co-Lead', org: 'GDGoC, Bowen University', dates: 'Oct 2024 \u2013 Jul 2025', blurb: 'Co-taught and mentored the design committee and helped shape its training curriculum from the ground up.' },
+      { role: 'Product Designer (Intern)', org: 'Health4Moni', dates: 'Sept 2023 \u2013 Aug 2024', blurb: 'End-to-end product design engagement for a health-insurance company \u2014 from stakeholder interviews and audits to a high-fidelity prototype, validated with usability testing.' },
+    ];
+    return { experience, cvHref: 'uploads/cv-1783182758801.docx' };
+  }
+}
+
+</script>
+</body>
+</html>

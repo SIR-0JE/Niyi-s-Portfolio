@@ -1,57 +1,108 @@
-import React, { useState, useEffect } from 'react'
-import FadeIn from './FadeIn'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { usePortfolio } from '../context/PortfolioContext'
 
-const Navbar: React.FC = () => {
-  const [currentHash, setCurrentHash] = useState(() => window.location.hash || '#/')
+const NAV_ITEMS = [
+  { label: 'Home',     href: '#/' },
+  { label: 'About',    href: '#/about' },
+  { label: 'Projects', href: '#/projects' },
+  { label: 'Contact',  href: '#/contact' },
+]
+
+export default function Navbar({ active }: { active: string }) {
+  const [scrolled, setScrolled] = useState(false)
+  const [open, setOpen] = useState(false)
+  const { data } = usePortfolio()
+  const nav = data.navbar
 
   useEffect(() => {
-    const handleHash = () => {
-      setCurrentHash(window.location.hash || '#/')
-    }
-    window.addEventListener('hashchange', handleHash)
-    return () => window.removeEventListener('hashchange', handleHash)
+    const fn = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', fn)
+    return () => window.removeEventListener('scroll', fn)
   }, [])
 
-  const navLinks = [
-    { label: 'Home', path: '#/' },
-    { label: 'About', path: '#/about' },
-    { label: 'Projects', path: '#/projects' },
-  ]
-
-  const handleLinkClick = (path: string) => {
-    window.location.hash = path
-  }
-
   return (
-    <FadeIn delay={0} y={-20} as="header" className="fixed top-0 left-0 w-full z-50">
-      <nav className="flex justify-between items-center px-6 md:px-10 py-6 md:py-8 bg-[#0C0C0C]/80 backdrop-blur-md border-b border-white/5">
-        {/* Logo / Jack */}
-        <button
-          onClick={() => handleLinkClick('#/')}
-          className="text-lg md:text-xl lg:text-[1.5rem] font-black uppercase tracking-tight text-[#D7E2EA] hover:opacity-80 transition-opacity bg-transparent border-none cursor-pointer"
-        >
-          Jack.3D
-        </button>
+    <motion.header
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        background: scrolled ? 'rgba(1,2,8,0.92)' : 'rgb(1,2,8)',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
+        transition: 'all 0.3s ease',
+      }}
+    >
+      <div className="wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '28px clamp(24px,5vw,100px)', gap: 24 }}>
+        {/* Logo */}
+        <a href="#/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
+          <svg width="34" height="24" viewBox="0 0 46 32">
+            <rect x="0" y="0" width="9.5" height="32" rx="0" fill="white" />
+            <rect x="23.7" y="0" width="9.5" height="32" rx="0" fill="white" />
+            <circle cx="16.6" cy="7.1" r="5.9" fill="rgb(255,128,74)" />
+            <circle cx="40.3" cy="24.9" r="5.9" fill="rgb(255,128,74)" />
+          </svg>
+          <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 18, color: '#fff', whiteSpace: 'nowrap' }}>{nav.logoText}</span>
+        </a>
 
-        {/* Links */}
-        <div className="flex gap-6 md:gap-10">
-          {navLinks.map((link) => {
-            const isActive = currentHash === link.path
-            return (
-              <button
-                key={link.label}
-                onClick={() => handleLinkClick(link.path)}
-                className={`text-xs sm:text-sm md:text-base lg:text-[1.2rem] font-medium uppercase tracking-wider transition-all duration-200 cursor-pointer bg-transparent border-none
-                  ${isActive ? 'text-white border-b-2 border-purple-500 pb-1' : 'text-[#D7E2EA] hover:opacity-70 pb-1'}`}
-              >
-                {link.label}
-              </button>
-            )
-          })}
-        </div>
-      </nav>
-    </FadeIn>
+        {/* Desktop nav */}
+        <nav className="hidden md:flex" style={{ gap: 40, alignItems: 'center' }}>
+          {NAV_ITEMS.map(it => (
+            <a key={it.label} href={it.href} style={{
+              fontFamily: 'Syne,sans-serif',
+              fontWeight: it.label === active ? 700 : 500,
+              fontSize: 18,
+              color: it.label === active ? 'rgb(255,128,74)' : 'rgb(203,203,203)',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+              transition: 'color 0.2s',
+            }}>
+              {it.label}
+            </a>
+          ))}
+        </nav>
+
+        {/* Hire Me pill */}
+        <a href={nav.hireMeHref} className="hidden md:flex" style={{
+          flexShrink: 0, alignItems: 'center', justifyContent: 'center',
+          padding: '10px 24px', borderRadius: 100,
+          border: '1.5px solid #fff',
+          fontFamily: 'Syne,sans-serif', fontWeight: 600, fontSize: 14, letterSpacing: '0.04em',
+          color: '#fff', textDecoration: 'none', whiteSpace: 'nowrap',
+          transition: 'background 0.2s, color 0.2s',
+        }}
+          onMouseEnter={e => { (e.target as HTMLElement).style.background = 'rgb(255,128,74)'; (e.target as HTMLElement).style.borderColor = 'rgb(255,128,74)'; (e.target as HTMLElement).style.color = 'rgb(1,2,8)' }}
+          onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.borderColor = '#fff'; (e.target as HTMLElement).style.color = '#fff' }}
+        >
+          HIRE ME
+        </a>
+
+        {/* Mobile burger */}
+        <button onClick={() => setOpen(o => !o)} className="md:hidden" style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span style={{ display: 'block', width: 24, height: 1.5, background: '#fff', transform: open ? 'rotate(45deg) translate(5px,5px)' : 'none', transition: 'transform 0.25s' }} />
+          <span style={{ display: 'block', width: open ? 24 : 16, height: 1.5, background: '#fff', transform: open ? 'rotate(-45deg) translate(5px,-5px)' : 'none', transition: 'all 0.25s' }} />
+        </button>
+      </div>
+
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }}
+            style={{ overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="wrap" style={{ paddingTop: 20, paddingBottom: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {NAV_ITEMS.map(it => (
+                <a key={it.label} href={it.href} onClick={() => setOpen(false)} style={{ fontFamily: 'Syne,sans-serif', fontWeight: it.label === active ? 700 : 500, fontSize: 18, color: it.label === active ? 'rgb(255,128,74)' : 'rgb(203,203,203)', textDecoration: 'none' }}>
+                  {it.label}
+                </a>
+              ))}
+              <a href={nav.hireMeHref} style={{ fontFamily: 'Syne,sans-serif', fontWeight: 600, fontSize: 14, color: '#fff', border: '1.5px solid #fff', borderRadius: 100, padding: '10px 24px', textDecoration: 'none', textAlign: 'center' }}>
+                HIRE ME
+              </a>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   )
 }
-
-export default Navbar

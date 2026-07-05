@@ -1,75 +1,101 @@
-import React from 'react'
-import FadeIn from '../components/FadeIn'
-import { MessageSquareQuote } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
 
 const testimonials = [
   {
-    quote: "Niyi restructured our civic platform's user workflows with outstanding results. User dropout decreased, navigation clarity improved, and the team registered positive feedback immediately.",
-    name: "Sarah Jenkins",
-    title: "Product Lead @ Electify"
+    name: 'Placeholder Name',
+    title: 'Job Title, Company',
+    quote: 'Placeholder testimonial — swap in a real quote from a community client or user once you have one.',
   },
   {
-    quote: "The design token schema and UI Handbooks Niyi prepared saved our development team dozens of hours. The attention to interactive micro-details is state of the art.",
-    name: "Marcus Vance",
-    title: "Lead Engineer @ Voterix"
+    name: 'Temidayo Adewale',
+    title: 'Product Manager, Voterix',
+    quote: 'Olaniyi has a rare ability to translate messy user pain into clean, purposeful design. The voting flow went from confusing to delightful — the numbers proved it.',
   },
   {
-    quote: "A true professional with a distinct, high-end visual signature. Niyi managed our logic prototypes and high-fidelity frameworks smoothly from start to finish.",
-    name: "Elena Rostova",
-    title: "CTO @ Solaris Tech"
-  }
+    name: 'Aisha Bello',
+    title: 'Clinical Coordinator, Triage Health',
+    quote: 'The offline-first, Pidgin-friendly approach was exactly what our users needed. Olaniyi listened before he designed — and it showed.',
+  },
 ]
 
-const TestimonialSlider: React.FC = () => {
+export default function TestimonialsSection() {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, amount: 0.2 })
+  const [active, setActive] = useState(0)
+
   return (
-    <section
-      id="testimonials"
-      className="bg-[#0C0C0C] text-[#D7E2EA] px-5 sm:px-8 md:px-12 lg:px-16 py-24 sm:py-32 border-t border-neutral-900 overflow-hidden"
-    >
-      <div className="max-w-6xl mx-auto flex flex-col gap-16">
-        
-        {/* Section Heading */}
-        <FadeIn delay={0} y={35} className="flex flex-col items-center text-center">
-          <span className="text-purple-400 font-bold uppercase tracking-widest text-xs sm:text-sm">
-            Kind Words
-          </span>
-          <h2
-            className="hero-heading font-black uppercase leading-none tracking-tight mt-2"
-            style={{ fontSize: 'clamp(2.5rem, 8vw, 110px)' }}
-          >
-            Social Proof
-          </h2>
-        </FadeIn>
+    <section className="py-20 border-t border-brd" id="testimonials">
+      <div className="wrap">
+        {/* Label */}
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, x: -20 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          className="flex items-center gap-2 mb-10"
+        >
+          <span className="text-orange text-[0.55rem]">◆</span>
+          <span className="font-mono text-[0.65rem] tracking-[0.16em] uppercase text-orange">What they say</span>
+        </motion.div>
 
-        {/* Draggable/Scrollable Cards list */}
-        <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory">
-          {testimonials.map((t, index) => (
-            <div
-              key={index}
-              className="min-w-[280px] sm:min-w-[360px] md:min-w-[420px] bg-[#111] border border-purple-500/10 rounded-[30px] p-6 sm:p-8 flex flex-col gap-6 snap-start flex-1"
-            >
-              <div className="text-purple-400">
-                <MessageSquareQuote size={32} />
-              </div>
-              
-              <p className="text-[#D7E2EA] text-sm sm:text-base leading-relaxed font-light font-sans flex-1">
-                "{t.quote}"
-              </p>
-
-              <div className="flex flex-col gap-1 border-t border-neutral-900 pt-4">
-                <span className="text-sm font-bold text-white uppercase tracking-tight">
-                  {t.name}
-                </span>
-                <span className="text-xs text-neutral-500 font-medium">
-                  {t.title}
-                </span>
-              </div>
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="bg-[#0e0e0e] border border-white/[0.06] grid grid-cols-1 sm:grid-cols-[220px_1fr]"
+        >
+          {/* Left: person info */}
+          <div className="flex sm:flex-col justify-between sm:justify-start gap-4 p-6 border-b sm:border-b-0 sm:border-r border-white/[0.06]">
+            {/* Avatar placeholder */}
+            <div className="w-10 h-10 rounded-full bg-white/10 shrink-0" />
+            <div>
+              <div className="font-display font-bold text-sm text-text">{testimonials[active].name}</div>
+              <div className="font-mono text-[0.55rem] tracking-[0.12em] uppercase text-muted mt-0.5">{testimonials[active].title}</div>
             </div>
-          ))}
-        </div>
+          </div>
+
+          {/* Right: quote */}
+          <div className="p-6 sm:p-10 relative">
+            {/* Big quote mark */}
+            <span className="text-orange font-serif text-5xl leading-none absolute top-6 left-6 sm:top-8 sm:left-10 select-none">"</span>
+
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={active}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.35, ease: [0.2, 0.85, 0.2, 1] }}
+                className="font-display font-medium text-base sm:text-lg leading-relaxed text-text mt-8 sm:mt-10"
+              >
+                {testimonials[active].quote}
+              </motion.p>
+            </AnimatePresence>
+
+            {/* Navigation arrows — bottom right, orange */}
+            <div className="flex items-center gap-2 mt-8 justify-end">
+              <button
+                onClick={() => setActive(a => (a - 1 + testimonials.length) % testimonials.length)}
+                className="w-8 h-8 border border-white/10 flex items-center justify-center hover:border-orange hover:text-orange text-muted transition-all duration-200 cursor-pointer"
+              >
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setActive(a => (a + 1) % testimonials.length)}
+                className="w-8 h-8 border border-orange bg-orange text-white flex items-center justify-center hover:bg-orange/80 transition-all duration-200 cursor-pointer"
+              >
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   )
 }
-
-export default TestimonialSlider

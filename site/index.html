@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ojedokun Olaniyi — UI/UX Designer</title>
+  <meta name="description" content="UI/UX Designer specialising in user-centered design across civic-tech, fintech and mental health. Over 5 years of experience turning research into interfaces that move real numbers.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-noise" aria-hidden="true"></div>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <a href="index.html" class="navbar__logo" aria-label="Ojedokun home">
+    <svg width="34" height="24" viewBox="0 0 46 32" aria-hidden="true">
+      <rect x="0"    y="0" width="9.5" height="32" rx="0" fill="white"/>
+      <rect x="23.7" y="0" width="9.5" height="32" rx="0" fill="white"/>
+      <circle cx="16.6" cy="7.1"  r="5.9" fill="rgb(255,128,74)"/>
+      <circle cx="40.3" cy="24.9" r="5.9" fill="rgb(255,128,74)"/>
+    </svg>
+    <span class="navbar__logo-text">OJEDOKUN</span>
+  </a>
+  <ul class="navbar__links" role="list">
+    <li><a href="index.html"    class="active" aria-current="page">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="projects.html">Projects</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <a href="mailto:olaniyiojedokun24@gmail.com" class="btn btn--hire" id="nav-hire">HIRE ME</a>
+  <button class="navbar__mobile-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation">
+  <button class="mobile-menu__close" id="mobile-close" aria-label="Close menu">&times;</button>
+  <a href="index.html"    class="active">Home</a>
+  <a href="about.html">About</a>
+  <a href="projects.html">Projects</a>
+  <a href="contact.html">Contact</a>
+  <a href="mailto:olaniyiojedokun24@gmail.com" class="btn btn--primary" style="margin-top:16px;">HIRE ME</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" aria-labelledby="hero-headline">
+  <div class="container">
+    <div style="display:flex;flex-direction:column;gap:32px;">
+      <h1 id="hero-headline" class="hero__headline animate-fade-up animate-fade-up--d1">
+        I'M A UI/UX DESIGNER<br>
+        WHO DESIGNS <span class="accent">USER-CENTERED</span><br>
+        EXPERIENCES
+      </h1>
+      <div style="display:flex;flex-direction:row;gap:40px;align-items:flex-end;flex-wrap:wrap;justify-content:space-between;" class="animate-fade-up animate-fade-up--d2">
+        <p class="hero__sub">
+          Over 5 years turning user research into interfaces that move real numbers — across civic-tech, fintech and mental health.
+        </p>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <a href="projects.html" class="btn btn--primary" id="hero-view-work">View My Work</a>
+          <a href="contact.html"  class="btn btn--outline" id="hero-contact">Get In Touch</a>
+        </div>
+      </div>
+      <div class="stats-bar animate-fade-up animate-fade-up--d3">
+        <div class="stat-item">
+          <span class="stat-value">5+</span>
+          <span class="stat-label">Years of experience</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">89%</span>
+          <span class="stat-label">Voter turnout lifted at Voterix</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">1,939</span>
+          <span class="stat-label">Students served via GoChow</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">4</span>
+          <span class="stat-label">End-to-end product case studies</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EXPERTISE ═══ -->
+<section class="section reveal" aria-labelledby="expertise-heading">
+  <div class="container">
+    <div class="section-label">
+      <span class="section-label__dot" aria-hidden="true"></span>
+      <h2 class="section-label__text" id="expertise-heading">Expertise</h2>
+    </div>
+    <div class="expertise-grid">
+      <div class="expertise-card">
+        <div class="expertise-card__icon" aria-hidden="true">🔍</div>
+        <h3 class="expertise-card__title">User Research</h3>
+        <p class="expertise-card__body">Interviews, surveys, and usability testing that turn assumptions into evidence before a single pixel is placed.</p>
+      </div>
+      <div class="expertise-card">
+        <div class="expertise-card__icon" aria-hidden="true">✦</div>
+        <h3 class="expertise-card__title">UI/UX Design</h3>
+        <p class="expertise-card__body">Low-fidelity wireframes to high-fidelity, component-based prototypes in Figma — built to hand off clean.</p>
+      </div>
+      <div class="expertise-card">
+        <div class="expertise-card__icon" aria-hidden="true">🔄</div>
+        <h3 class="expertise-card__title">Testing &amp; Iteration</h3>
+        <p class="expertise-card__body">Moderated usability testing and iteration on flows, labels, and copy until the right action is the obvious one.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURED WORK ═══ -->
+<section class="section reveal" aria-labelledby="featured-heading">
+  <div class="container">
+    <div style="display:flex;flex-direction:row;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:32px;">
+      <div class="section-label" style="margin-bottom:0;">
+        <span class="section-label__dot" aria-hidden="true"></span>
+        <h2 class="section-label__text" id="featured-heading">Featured Work</h2>
+      </div>
+      <a href="projects.html" style="font-family:'Syne',sans-serif;font-weight:500;font-size:18px;color:var(--text-white);text-decoration:underline;" id="view-all-link">view all →</a>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:32px;">
+
+      <!-- Voterix -->
+      <article class="project-card reveal" aria-label="Voterix case study">
+        <div class="project-card__thumb">
+          <span class="project-card__thumb-label" aria-hidden="true">Voterix</span>
+        </div>
+        <div class="project-card__body">
+          <h3 class="project-card__headline">Making campus voting so simple people actually vote</h3>
+          <div class="project-card__metrics">
+            <div class="metric">
+              <div class="metric__values">
+                <span class="metric__before">50%</span>
+                <span class="metric__arrow" aria-hidden="true">→</span>
+                <span class="metric__after">89%</span>
+              </div>
+              <span class="metric__label">Voter Turnout · NUAMS</span>
+            </div>
+            <div class="metric">
+              <div class="metric__values">
+                <span class="metric__before">500</span>
+                <span class="metric__arrow" aria-hidden="true">→</span>
+                <span class="metric__after">596</span>
+              </div>
+              <span class="metric__label">Voters · NACOS</span>
+            </div>
+          </div>
+          <div class="project-card__footer">
+            <div class="project-card__meta">
+              <span class="project-card__role">Founder &amp; Product Designer</span>
+              <span class="tag">UX Research</span>
+              <span class="tag">Interaction Design</span>
+            </div>
+            <a href="projects.html" class="project-card__link" id="voterix-link">Case Study ↗</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Health4Moni -->
+      <article class="project-card reveal" aria-label="Health4Moni case study">
+        <div class="project-card__thumb">
+          <span class="project-card__thumb-label" aria-hidden="true">Health4Moni</span>
+        </div>
+        <div class="project-card__body">
+          <h3 class="project-card__headline">Turning a confusing insurance sign-up into a checkout people finish</h3>
+          <div class="project-card__metrics">
+            <div class="metric">
+              <div class="metric__values">
+                <span class="metric__before">Low-fi</span>
+                <span class="metric__arrow" aria-hidden="true">→</span>
+                <span class="metric__after">Hi-fi</span>
+              </div>
+              <span class="metric__label">Prototype Fidelity</span>
+            </div>
+            <div class="metric">
+              <div class="metric__values">
+                <span class="metric__before">0</span>
+                <span class="metric__arrow" aria-hidden="true">→</span>
+                <span class="metric__after">5</span>
+              </div>
+              <span class="metric__label">Users Usability-Tested</span>
+            </div>
+          </div>
+          <div class="project-card__footer">
+            <div class="project-card__meta">
+              <span class="project-card__role">Product Designer (Intern)</span>
+              <span class="tag">Journey Mapping</span>
+              <span class="tag">Prototyping</span>
+            </div>
+            <a href="projects.html" class="project-card__link" id="health4moni-link">Case Study ↗</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS ═══ -->
+<section class="testimonial-section reveal" aria-label="Testimonials">
+  <div class="container">
+    <div class="section-label">
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--text-muted);">✦</span>
+      <h2 class="section-label__text">What they say</h2>
+    </div>
+    <div style="position:relative;min-height:120px;">
+      <div class="testimonial-slide" style="position:absolute;inset:0;transition:opacity 0.5s ease;opacity:1;">
+        <div style="display:flex;flex-direction:row;gap:48px;flex-wrap:wrap;align-items:flex-start;">
+          <div style="display:flex;align-items:center;gap:16px;min-width:220px;">
+            <div class="testimonial-author-avatar" aria-hidden="true"></div>
+            <div>
+              <p class="testimonial-author-name">Placeholder Name</p>
+              <p class="testimonial-author-role">Role, Company</p>
+            </div>
+          </div>
+          <div style="flex:1 1 480px;">
+            <blockquote class="testimonial-quote">"Placeholder testimonial — swap in a real quote from a teammate, client, or user once you have one."</blockquote>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-slide" style="position:absolute;inset:0;transition:opacity 0.5s ease;opacity:0;pointer-events:none;">
+        <div style="display:flex;flex-direction:row;gap:48px;flex-wrap:wrap;align-items:flex-start;">
+          <div style="display:flex;align-items:center;gap:16px;min-width:220px;">
+            <div class="testimonial-author-avatar" aria-hidden="true"></div>
+            <div>
+              <p class="testimonial-author-name">Placeholder Name</p>
+              <p class="testimonial-author-role">Role, Company</p>
+            </div>
+          </div>
+          <div style="flex:1 1 480px;">
+            <blockquote class="testimonial-quote">"Another placeholder quote — add a second testimonial here once you have feedback to share."</blockquote>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:120px;">
+      <button class="testimonial-nav-btn testimonial-nav-btn--prev" id="t-prev" aria-label="Previous testimonial">←</button>
+      <button class="testimonial-nav-btn testimonial-nav-btn--next" id="t-next" aria-label="Next testimonial">→</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="section reveal" aria-labelledby="faq-heading">
+  <div class="container">
+    <div class="section-label">
+      <span class="section-label__dot" aria-hidden="true"></span>
+      <h2 class="section-label__text" id="faq-heading">Frequently Asked Questions</h2>
+    </div>
+    <div role="list">
+      <div class="faq-item open" role="listitem" tabindex="0" aria-expanded="true">
+        <div class="faq-header">
+          <p class="faq-question">What does your design process look like?</p>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </div>
+        <p class="faq-answer">I start by framing the problem — stakeholder interviews, heuristic and competitive audits — before touching a wireframe. Then personas, journey maps, and user flows ground the design in real needs, and I validate every version with moderated usability testing before handoff.</p>
+      </div>
+      <div class="faq-item" role="listitem" tabindex="0" aria-expanded="false">
+        <div class="faq-header">
+          <p class="faq-question">What tools do you design with?</p>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </div>
+        <p class="faq-answer">Figma and FigJam for design and collaboration, with Maze and Google Forms for testing and surveys.</p>
+      </div>
+      <div class="faq-item" role="listitem" tabindex="0" aria-expanded="false">
+        <div class="faq-header">
+          <p class="faq-question">Do you only design, or do you also think about the business side?</p>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </div>
+        <p class="faq-answer">Both — as a startup COO I've owned product and operations end to end, so I design with an eye on the metric a screen is meant to move, not just how it looks.</p>
+      </div>
+      <div class="faq-item" role="listitem" tabindex="0" aria-expanded="false">
+        <div class="faq-header">
+          <p class="faq-question">Are you open to freelance or full-time roles?</p>
+          <span class="faq-icon" aria-hidden="true">+</span>
+        </div>
+        <p class="faq-answer">Yes to both. Reach out on the Contact page and I'll get back to you quickly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer reveal" role="contentinfo">
+  <div class="container" style="display:flex;flex-direction:column;align-items:center;gap:32px;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;">
+      <p class="footer__cta">LET'S TALK!</p>
+      <a href="mailto:olaniyiojedokun24@gmail.com" class="footer__email">olaniyiojedokun24@gmail.com</a>
+    </div>
+    <div class="footer__bottom" style="width:100%;">
+      <span class="footer__copy">© Ojedokun Olaniyi — 2026</span>
+      <div class="footer__links">
+        <a href="https://www.linkedin.com/in/olaniyi-ojedokun" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="mailto:olaniyiojedokun24@gmail.com">Email</a>
+        <a href="tel:+2349135382861">Phone</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>
