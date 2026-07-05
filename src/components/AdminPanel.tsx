@@ -527,9 +527,7 @@ export default function AdminPanel() {
 
   /* Tab */
   const [tab, setTab] = useState<TabKey>('hero')
-  const [saving, setSaving] = useState(false)
   const { syncStatus } = usePortfolio()
-  const flash = () => { setSaving(true); setTimeout(() => setSaving(false), 700) }
 
   /* Sync status display helpers */
   const syncLabel = syncStatus === 'saving' ? '⟳ Syncing to cloud…'
@@ -591,7 +589,7 @@ export default function AdminPanel() {
             </button>
           ))}
           <div style={{ marginTop: 'auto', paddingTop: 20, borderTop: `1px solid ${T.border}` }}>
-            <button onClick={() => { if (window.confirm('Reset ALL content to defaults?')) { reset(); flash() } }}
+            <button onClick={() => { if (window.confirm('Reset ALL content to defaults?')) { reset() } }}
               style={{ background: 'none', border: 'none', color: T.danger, fontSize: 12, cursor: 'pointer', fontFamily: 'Poppins,sans-serif', padding: '8px 14px' }}>
               ⚠️ Reset to defaults
             </button>
@@ -599,8 +597,7 @@ export default function AdminPanel() {
         </aside>
 
         {/* Main panel */}
-        <main style={{ marginLeft: 220, flex: 1, padding: '32px 40px', overflowY: 'auto', maxWidth: 900 }}
-          onChange={flash}>
+        <main style={{ marginLeft: 220, flex: 1, padding: '32px 40px', overflowY: 'auto', maxWidth: 900 }}>
           {tab === 'navbar'       && <NavbarEditor />}
           {tab === 'hero'        && <HeroEditor />}
           {tab === 'expertise'   && <ExpertiseEditor />}
