@@ -8,27 +8,6 @@ const ACCENT = 'rgb(255,128,74)'
 const MUTED = 'rgb(203,203,203)'
 const BG = 'rgb(1,2,8)'
 
-/* ── Animated headline ── */
-function HeroHeadline() {
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, amount: 0.2 })
-  const { data } = usePortfolio()
-  const h = data.hero
-  return (
-    <div ref={ref}>
-      <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(36px,5.5vw,64px)', lineHeight: 1.15, color: '#fff', margin: 0 }}>
-        {[{ text: h.headline1, orange: false }, { text: h.headline2, orange: false }, { text: h.headline3, orange: true }, { text: h.headline4, orange: true }].map((p, i) => (
-          <motion.span key={i} initial={{ opacity: 0, y: 50 }} animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-            style={{ display: 'inline', color: p.orange ? ACCENT : '#fff' }}>
-            {p.text}{i < 1 ? <br /> : ''}
-          </motion.span>
-        ))}
-      </h1>
-    </div>
-  )
-}
-
 /* ── Project card ── */
 function ProjectCard({ proj, i }: { proj: ReturnType<typeof usePortfolio>['data']['featuredProjects'][0]; i: number }) {
   const ref = useRef<HTMLDivElement>(null)

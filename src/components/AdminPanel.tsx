@@ -531,8 +531,7 @@ export default function AdminPanel() {
 
   const flash = () => { setSaving(true); setTimeout(() => setSaving(false), 700) }
 
-  /* Auto-flash on any context write */
-  const { setNested } = usePortfolio()
+  /* Auto-flash triggered by child section saves — usePortfolio used in sub-components */
 
   if (!authed) {
     return (

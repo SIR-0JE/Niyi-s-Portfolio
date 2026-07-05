@@ -82,25 +82,27 @@ function MainContent() {
     return () => window.removeEventListener('hashchange', onChange)
   }, [])
 
-  if (route === '#/admin') return <AdminPanel />
+  const isAdmin = route === '#/admin'
 
   const renderPage = () => {
-    if (route === '#/about')    return <AboutPage />
-    if (route === '#/projects') return <ProjectsPage />
-    if (route === '#/contact')  return <ContactPage />
-    if (route === '#/case/mindvox')   return <CaseStudyMindvox />
-    if (route === '#/case/voterix')   return <CaseStudyVoterix />
+    if (isAdmin)                        return <AdminPanel />
+    if (route === '#/about')            return <AboutPage />
+    if (route === '#/projects')         return <ProjectsPage />
+    if (route === '#/contact')          return <ContactPage />
+    if (route === '#/case/mindvox')     return <CaseStudyMindvox />
+    if (route === '#/case/voterix')     return <CaseStudyVoterix />
     if (route === '#/case/health4moni') return <CaseStudyHealth4Moni />
-    if (route === '#/case/gaffer')    return <CaseStudyGaffer />
+    if (route === '#/case/gaffer')      return <CaseStudyGaffer />
     return <HomePage />
   }
 
   const activeLabel = route === '#/about' ? 'About' : route === '#/projects' ? 'Projects' : route === '#/contact' ? 'Contact' : 'Home'
 
   return (
-    <div style={{ background: 'rgb(1,2,8)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <CustomCursor />
-      <Navbar active={activeLabel} />
+    // On admin: restore native cursor so the panel is fully usable
+    <div style={{ background: 'rgb(1,2,8)', minHeight: '100vh', display: 'flex', flexDirection: 'column', cursor: isAdmin ? 'auto' : undefined }}>
+      {!isAdmin && <CustomCursor />}
+      {!isAdmin && <Navbar active={activeLabel} />}
       <main style={{ flex: 1 }}>{renderPage()}</main>
     </div>
   )
