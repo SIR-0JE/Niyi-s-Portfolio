@@ -57,8 +57,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
       const modelName = engine === 'gemini-pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
-      const model = genAI.getGenerativeModel({ model: modelName, systemInstruction: systemPrompt });
-      const result = await model.generateContent(prompt);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const fullPrompt = `${systemPrompt}\n\nUSER NOTES:\n${prompt}`;
+      const result = await model.generateContent(fullPrompt);
       const response = await result.response;
       rawJson = response.text().trim();
     } else {
