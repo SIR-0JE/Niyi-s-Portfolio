@@ -51,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const textContent = message.content.find(c => c.type === 'text');
       if (!textContent || textContent.type !== 'text') throw new Error('No text returned from Claude');
       rawJson = textContent.text.trim();
-    } else if (engine === 'gemini') {
+    } else if (engine === 'gemini' || engine === 'gemini-pro') {
       if (!process.env.GEMINI_API_KEY) {
         return res.status(500).json({ error: 'Missing GEMINI_API_KEY environment variable' });
       }
