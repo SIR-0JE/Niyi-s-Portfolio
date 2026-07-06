@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: 'Missing GEMINI_API_KEY environment variable' });
       }
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-      const modelName = engine === 'gemini-pro' ? 'gemini-1.5-pro-latest' : 'gemini-1.5-flash-latest';
+      const modelName = engine === 'gemini-pro' ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
       const model = genAI.getGenerativeModel({ model: modelName, systemInstruction: systemPrompt });
       const result = await model.generateContent(prompt);
       const response = await result.response;
