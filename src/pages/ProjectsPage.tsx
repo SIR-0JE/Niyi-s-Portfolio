@@ -16,34 +16,20 @@ function ProjectCard({ proj, i }: { proj: ReturnType<typeof usePortfolio>['data'
     <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
       style={{ display: 'flex', flexDirection: 'column', borderRadius: 24, background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
       {/* Cover */}
-      <div style={{ margin: 20, minHeight: 300, borderRadius: 16, background: 'rgb(6,8,14)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
-        {proj.coverImageUrl && <img src={proj.coverImageUrl} alt={proj.category} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }} />}
-        <motion.span style={{ y: ghostY, fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(28px,4vw,48px)', color: 'rgba(255,255,255,0.14)', userSelect: 'none', position: 'relative', zIndex: 10 }}>
-          {proj.slug.toUpperCase()}
-        </motion.span>
+      <div className="aspect-video" style={{ margin: 20, borderRadius: 16, background: 'rgb(6,8,14)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+        {proj.coverImageUrl && <img src={proj.coverImageUrl} alt={proj.category} className="absolute inset-0 w-full h-full object-cover" />}
       </div>
       {/* Body */}
       <div style={{ padding: '0 32px 32px', display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 600, fontSize: 'clamp(22px,2.6vw,28px)', lineHeight: 1.3, color: '#fff', maxWidth: 560 }}>{proj.headline}</span>
-        {/* Stats */}
-        <div style={{ display: 'flex', flexDirection: 'row', gap: 48, flexWrap: 'wrap' }}>
-          {proj.stats.map((s, si) => (
-            <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-                <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 28, color: '#fff' }}>{s.val}</span>
-              </div>
-              <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 500, fontSize: 11, letterSpacing: '0.08em', color: M, textTransform: 'uppercase' }}>{s.label}</span>
-            </div>
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="text-orange-500 font-bold uppercase text-xs tracking-widest">{proj.slug}</span>
+          <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 600, fontSize: 'clamp(22px,2.6vw,28px)', lineHeight: 1.3, color: '#fff', maxWidth: 560 }}>{proj.headline}</span>
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 600, fontSize: 11, letterSpacing: '0.08em', color: M, textTransform: 'uppercase' }}>{proj.role}</span>
-            <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 500, fontSize: 11, letterSpacing: '0.04em', color: M, textTransform: 'uppercase', padding: '6px 12px', borderRadius: 100, background: 'rgba(255,255,255,0.06)' }}>
-              {proj.categoryTag}
-            </span>
-          </div>
+          <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 500, fontSize: 11, letterSpacing: '0.04em', color: M, textTransform: 'uppercase', padding: '6px 12px', borderRadius: 100, background: 'rgba(255,255,255,0.06)' }}>
+            {proj.role}
+          </span>
           <a href={`#/case/${proj.slug}`} style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 600, fontSize: 13, letterSpacing: '0.04em', color: A, textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>Case Study ↗</a>
         </div>
       </div>
