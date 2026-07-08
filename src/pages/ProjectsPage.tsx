@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { motion, useInView, useScroll, useTransform } from 'framer-motion'
+import { motion, useInView } from 'framer-motion'
 import Footer from '../components/Footer'
 import { usePortfolio } from '../context/PortfolioContext'
 
@@ -9,8 +9,6 @@ const M = 'rgb(203,203,203)'
 function ProjectCard({ proj, i }: { proj: ReturnType<typeof usePortfolio>['data']['caseStudies'][0]; i: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.08 })
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
-  const ghostY = useTransform(scrollYProgress, [0, 1], [20, -20])
 
   return (
     <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.65, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
