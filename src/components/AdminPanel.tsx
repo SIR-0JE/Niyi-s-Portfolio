@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
 import type {
   HeroContent, ExpertiseCard, FeaturedProject, Stat,
-  FAQItem, TestimonialItem, ExperienceItem, CaseStudyContent, ProcessStep, OutcomeCard, CaseStudyStat
+  FAQItem, TestimonialItem, ExperienceItem, CaseStudyContent, ProcessStep, OutcomeCard, CaseStudyStat, OtherWorkItem
 } from '../context/PortfolioContext'
 
 /* ── Design tokens ── */
@@ -439,7 +439,7 @@ function CaseStudyEditor() {
           </div>
         ))}
         <Btn onClick={() => setNested('caseStudies', [...studies, {
-          slug: 'new-project', category: 'New Category', headline: 'New project headline', stats: [], role: '', timeline: '', categoryTag: '', problem: '', process: [], outcomes: [], behanceUrl: 'https://behance.net', coverImageUrl: '', processImageUrl: ''
+          slug: 'new-project', category: 'New Category', headline: 'New project headline', stats: [], role: '', timeline: '', categoryTag: '', problem: '', process: [], outcomes: [], behanceUrl: 'https://behance.net', liveUrl: '', coverImageUrl: '', processImageUrl: ''
         }])}>+ Add Case Study</Btn>
       </div>
     )
@@ -473,6 +473,7 @@ function CaseStudyEditor() {
             <Field label="Timeline"><Inp value={cs.timeline} onChange={v => upd(active, { timeline: v })} /></Field>
             <Field label="Context tag (grid)"><Inp value={cs.categoryTag} onChange={v => upd(active, { categoryTag: v })} /></Field>
             <Field label="Behance URL"><Inp value={cs.behanceUrl} onChange={v => upd(active, { behanceUrl: v })} /></Field>
+            <Field label="Live site URL (leave empty to hide button)"><Inp value={cs.liveUrl} onChange={v => upd(active, { liveUrl: v })} /></Field>
           </div>
           <Field label="Main headline"><Ta value={cs.headline} onChange={v => upd(active, { headline: v })} rows={2} /></Field>
           <Divider />
@@ -542,10 +543,38 @@ function CaseStudyEditor() {
   )
 }
 
+function OtherWorkEditor() {
+  const { data, setNested } = usePortfolio()
+  const items = data.otherWork
+  const upd = (i: number, patch: Partial<OtherWorkItem>) => {
+    const a = [...items]; a[i] = { ...a[i], ...patch }; setNested('otherWork', a)
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <SecHead title="Other Work" sub="Lightweight visual gallery on the Projects page — landing pages, screens, explorations. Each card links straight out to its Behance project." />
+      {items.map((item, i) => (
+        <div key={i} style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={row}>
+            <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: T.text, flex: 1 }}>{item.title || `Item ${i + 1}`}</span>
+            <Ghost onClick={() => setNested('otherWork', items.filter((_, j) => j !== i))}>Remove</Ghost>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Field label="Title"><Inp value={item.title} onChange={v => upd(i, { title: v })} /></Field>
+            <Field label="Tag (e.g. Landing Page)"><Inp value={item.tag} onChange={v => upd(i, { tag: v })} /></Field>
+          </div>
+          <ImgField label="Cover Image" value={item.imageUrl} onChange={v => upd(i, { imageUrl: v })} />
+          <Field label="Behance / Dribbble project URL"><Inp value={item.externalUrl} onChange={v => upd(i, { externalUrl: v })} /></Field>
+        </div>
+      ))}
+      <Btn onClick={() => setNested('otherWork', [...items, { title: '', tag: '', imageUrl: '', externalUrl: 'https://behance.net' }])}>+ Add Item</Btn>
+    </div>
+  )
+}
+
 /* ─────────────────────────────────────────────
    SIDEBAR TABS CONFIG
 ───────────────────────────────────────────── */
-type TabKey = 'navbar' | 'hero' | 'expertise' | 'featured' | 'testimonials' | 'faq' | 'footer' | 'about' | 'casestudies'
+type TabKey = 'navbar' | 'hero' | 'expertise' | 'featured' | 'testimonials' | 'faq' | 'footer' | 'about' | 'casestudies' | 'otherwork'
 const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'navbar',       label: 'Navbar',          icon: '⚓' },
   { key: 'hero',        label: 'Hero',             icon: '🏠' },
@@ -556,6 +585,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'footer',      label: 'Footer',           icon: '🔗' },
   { key: 'about',       label: 'About + Exp.',     icon: '👤' },
   { key: 'casestudies', label: 'Case Studies',     icon: '📋' },
+  { key: 'otherwork',   label: 'Other Work',       icon: '🖼️' },
 ]
 
 /* ─────────────────────────────────────────────
@@ -664,6 +694,7 @@ export default function AdminPanel() {
           {tab === 'footer'      && <FooterEditor />}
           {tab === 'about'       && <AboutEditor />}
           {tab === 'casestudies' && <CaseStudyEditor />}
+          {tab === 'otherwork'   && <OtherWorkEditor />}
         </main>
       </div>
     </div>

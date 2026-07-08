@@ -102,8 +102,16 @@ export interface CaseStudyContent {
   process: ProcessStep[]
   outcomes: OutcomeCard[]
   behanceUrl: string
+  liveUrl: string
   coverImageUrl: string
   processImageUrl: string
+}
+
+export interface OtherWorkItem {
+  title: string
+  tag: string          // "Landing Page", "Visual Exploration", "Screens"
+  imageUrl: string
+  externalUrl: string  // direct link to the specific Behance/Dribbble project
 }
 
 export interface PortfolioContent {
@@ -117,6 +125,7 @@ export interface PortfolioContent {
   about: AboutContent
   experience: ExperienceItem[]
   caseStudies: CaseStudyContent[]
+  otherWork: OtherWorkItem[]
 }
 
 /* ─────────────────────────────────────────────
@@ -227,6 +236,7 @@ const DEFAULT: PortfolioContent = {
       ],
       outcomes: [{ val: '100%', label: 'Completion rate (testing)' }, { val: '8/8', label: 'Users felt safe' }, { val: 'Ready', label: 'For deployment' }],
       behanceUrl: 'https://behance.net',
+      liveUrl: '',
       coverImageUrl: '',
       processImageUrl: '',
     },
@@ -246,6 +256,7 @@ const DEFAULT: PortfolioContent = {
       ],
       outcomes: [{ val: '89%', label: 'Voter turnout on launch' }, { val: '39pt', label: 'Increase from baseline' }, { val: '3', label: 'Associations adopted the platform' }],
       behanceUrl: 'https://behance.net',
+      liveUrl: '',
       coverImageUrl: '',
       processImageUrl: '',
     },
@@ -265,6 +276,7 @@ const DEFAULT: PortfolioContent = {
       ],
       outcomes: [{ val: '9', label: 'Full-featured screens delivered' }, { val: '95%', label: 'Task completion in testing' }, { val: 'Ready', label: 'For dev handoff' }],
       behanceUrl: 'https://behance.net',
+      liveUrl: '',
       coverImageUrl: '',
       processImageUrl: '',
     },
@@ -284,9 +296,14 @@ const DEFAULT: PortfolioContent = {
       ],
       outcomes: [{ val: '300+', label: 'Active users in pilot' }, { val: '85%', label: 'Return rate (week 2)' }, { val: 'Live', label: 'Ready to scale' }],
       behanceUrl: 'https://behance.net',
+      liveUrl: '',
       coverImageUrl: '',
       processImageUrl: '',
     },
+  ],
+  otherWork: [
+    { title: 'GoChow Landing Page', tag: 'Landing Page', imageUrl: '', externalUrl: 'https://behance.net' },
+    { title: 'Fintech Onboarding Screens', tag: 'Visual Exploration', imageUrl: '', externalUrl: 'https://behance.net' },
   ],
 }
 

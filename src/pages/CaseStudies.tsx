@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Footer from '../components/Footer'
+import LiveProjectButton from '../components/LiveProjectButton'
 import { usePortfolio } from '../context/PortfolioContext'
 import type { CaseStudyContent } from '../context/PortfolioContext'
 
@@ -8,7 +9,7 @@ const A = 'rgb(255,128,74)'
 const M = 'rgb(203,203,203)'
 
 function ImagePlaceholder({ caption, url }: { caption: string; url?: string }) {
-  if (url) return <img src={url} alt={caption} style={{ maxWidth: 1240, width: '100%', margin: '0 auto', display: 'block', height: 400, objectFit: 'cover', borderRadius: 20, border: '1px solid rgba(255,128,74,0.2)' }} />
+  if (url) return <img src={url} alt={caption} style={{ maxWidth: 1240, width: '100%', margin: '0 auto', display: 'block', height: 'auto', borderRadius: 20, border: '1px solid rgba(255,128,74,0.2)' }} />
   return (
     <div style={{ maxWidth: 1240, margin: '0 auto', width: '100%', height: 400, borderRadius: 20, background: 'linear-gradient(135deg,rgba(255,128,74,0.2),rgba(255,128,74,0.05))', border: '1px solid rgba(255,128,74,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 400, fontSize: 16, color: M }}>{caption}</span>
@@ -110,10 +111,13 @@ function CaseStudyPage({ cs }: { cs: CaseStudyContent }) {
       <Sec>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
           <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 28, color: '#fff' }}>See the full project</span>
-          <a href={cs.behanceUrl} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '16px 32px', borderRadius: 100, background: A, fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: 'rgb(1,2,8)', textDecoration: 'none' }}>
-            View on Behance ↗
-          </a>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            {cs.liveUrl && <LiveProjectButton href={cs.liveUrl} />}
+            <a href={cs.behanceUrl} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '16px 32px', borderRadius: 100, background: A, fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: 'rgb(1,2,8)', textDecoration: 'none' }}>
+              View on Behance ↗
+            </a>
+          </div>
         </div>
       </Sec>
 

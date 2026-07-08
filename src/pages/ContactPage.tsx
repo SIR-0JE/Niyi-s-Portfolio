@@ -12,10 +12,42 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
 }
 
+type Status = 'idle' | 'sending' | 'sent' | 'error'
+
 export default function ContactPage() {
-  const [sent, setSent] = useState(false)
+  const [status, setStatus] = useState<Status>('idle')
+  const [errorMsg, setErrorMsg] = useState('')
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.1 })
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const form = e.currentTarget
+    const key = import.meta.env.VITE_WEB3FORMS_KEY
+    if (!key) {
+      setStatus('error')
+      setErrorMsg('Form is not configured yet — set VITE_WEB3FORMS_KEY.')
+      return
+    }
+    setStatus('sending')
+    setErrorMsg('')
+    try {
+      const formData = new FormData(form)
+      formData.append('access_key', key)
+      formData.append('subject', 'New message from portfolio contact form')
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.success) {
+        setStatus('sent')
+        form.reset()
+      } else {
+        throw new Error(data.message || 'Submission failed')
+      }
+    } catch (err: any) {
+      setStatus('error')
+      setErrorMsg(err.message || 'Something went wrong — please email me directly instead.')
+    }
+  }
 
   return (
     <div style={{ background: 'rgb(1,2,8)', minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingTop: 88 }}>
@@ -60,24 +92,29 @@ export default function ContactPage() {
           <motion.div initial={{ opacity: 0, x: 30 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }}
             style={{ flex: '1 1 420px' }}>
             <form
-              onSubmit={e => { e.preventDefault(); setSent(true) }}
+              onSubmit={handleSubmit}
               style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: 40, borderRadius: 24, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <label style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 500, fontSize: 14, color: M }}>Name</label>
-                <input type="text" placeholder="Your name" required style={inputStyle} />
+                <input name="name" type="text" placeholder="Your name" required style={inputStyle} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <label style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 500, fontSize: 14, color: M }}>Email</label>
-                <input type="email" placeholder="you@email.com" required style={inputStyle} />
+                <input name="email" type="email" placeholder="you@email.com" required style={inputStyle} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <label style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 500, fontSize: 14, color: M }}>Message</label>
-                <textarea placeholder="Tell me about your project" rows={5} required style={{ ...inputStyle, resize: 'vertical' }} />
+                <textarea name="message" placeholder="Tell me about your project" rows={5} required style={{ ...inputStyle, resize: 'vertical' }} />
               </div>
-              <button type="submit"
-                style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: 'rgb(1,2,8)', background: A, border: 'none', borderRadius: 100, padding: '16px 32px', cursor: 'pointer', marginTop: 8 }}>
-                {sent ? 'Message sent — thank you!' : 'Send Message'}
+              {status === 'error' && (
+                <div style={{ fontFamily: 'Poppins,sans-serif', fontSize: 14, color: '#ff6b6b', background: 'rgba(255,107,107,0.08)', border: '1px solid rgba(255,107,107,0.2)', borderRadius: 10, padding: '12px 16px' }}>
+                  {errorMsg}
+                </div>
+              )}
+              <button type="submit" disabled={status === 'sending' || status === 'sent'}
+                style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: 'rgb(1,2,8)', background: A, border: 'none', borderRadius: 100, padding: '16px 32px', cursor: status === 'sending' || status === 'sent' ? 'default' : 'pointer', marginTop: 8, opacity: status === 'sending' ? 0.7 : 1 }}>
+                {status === 'sending' ? 'Sending…' : status === 'sent' ? 'Message sent — thank you!' : 'Send Message'}
               </button>
             </form>
           </motion.div>
