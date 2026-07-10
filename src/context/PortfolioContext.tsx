@@ -139,7 +139,7 @@ export function emptyProject(slug: string, type: ProjectType = 'case-study'): Pr
   return {
     slug, type, badge: 'personal', featured: false,
     name: '', headline: '', role: '', year: '', tools: '',
-    coverImageUrl: '', processImageUrl: '', liveUrl: '', behanceUrl: 'https://behance.net',
+    coverImageUrl: '', processImageUrl: '', liveUrl: '', behanceUrl: '',
     category: '', categoryTag: '',
     stats: [], problem: '', research: '', process: [], outcomes: [], reflection: '',
     gallery: [], galleryLayout: type === 'ui' ? 'horizontal' : 'grid',

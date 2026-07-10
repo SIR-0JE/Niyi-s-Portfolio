@@ -176,18 +176,22 @@ function ProjectDetailPage({ p }: { p: Project }) {
       <HighFidelityGallery p={p} />
 
       {/* Closing CTA */}
-      <Sec>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
-          <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 28, color: '#fff' }}>See the full project</span>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            {p.liveUrl && <LiveProjectButton href={p.liveUrl} />}
-            <a href={p.behanceUrl} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '16px 32px', borderRadius: 100, background: A, fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: 'rgb(1,2,8)', textDecoration: 'none' }}>
-              View on Behance ↗
-            </a>
+      {(p.liveUrl || p.behanceUrl) && (
+        <Sec>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
+            <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 28, color: '#fff' }}>See the full project</span>
+            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              {p.liveUrl && <LiveProjectButton href={p.liveUrl} />}
+              {p.behanceUrl && (
+                <a href={p.behanceUrl} target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '16px 32px', borderRadius: 100, background: A, fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: 'rgb(1,2,8)', textDecoration: 'none' }}>
+                  View on Behance ↗
+                </a>
+              )}
+            </div>
           </div>
-        </div>
-      </Sec>
+        </Sec>
+      )}
 
       <div style={{ marginTop: 'auto' }}><Footer /></div>
     </div>
