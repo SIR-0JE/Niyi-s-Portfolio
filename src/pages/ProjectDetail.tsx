@@ -40,6 +40,19 @@ function ProjectDetailPage({ p }: { p: Project }) {
 
   return (
     <div style={{ background: 'rgb(1,2,8)', minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingTop: 88 }}>
+      {/* Back to Projects */}
+      <div style={{ padding: '32px clamp(24px,5vw,100px) 0', boxSizing: 'border-box' }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto', width: '100%' }}>
+          <a href="#/projects" className="inline-flex items-center gap-2 font-['Poppins',sans-serif] font-medium text-[14px] text-[rgb(203,203,203)] hover:text-[rgb(255,128,74)] transition-colors duration-200 no-underline" style={{ textDecoration: 'none' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back to all projects
+          </a>
+        </div>
+      </div>
+
       {/* Hero cover */}
       <div style={{ padding: '64px clamp(24px,5vw,100px)', boxSizing: 'border-box' }}>
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>

@@ -116,7 +116,7 @@ function MainContent() {
     return <HomePage />
   }
 
-  const activeLabel = route === '#/about' ? 'About' : route === '#/projects' ? 'Projects' : route === '#/contact' ? 'Contact' : 'Home'
+  const activeLabel = route === '#/about' ? 'About' : (route === '#/projects' || route.startsWith('#/project/')) ? 'Projects' : route === '#/contact' ? 'Contact' : 'Home'
 
   return (
     // On admin: restore native cursor so the panel is fully usable
