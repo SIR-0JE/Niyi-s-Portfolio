@@ -14,11 +14,13 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
 
   return (
     <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      style={{ display: 'flex', flexDirection: 'column', borderRadius: 24, background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+      className="group border border-white/10 hover:border-white/30 transition-colors duration-500 ease-out cursor-pointer"
+      style={{ display: 'flex', flexDirection: 'column', borderRadius: 24, background: 'rgba(255,255,255,0.025)', overflow: 'hidden' }}
+      onClick={() => window.location.href = `#/project/${p.slug}`}>
       {/* Cover — real image or a clean placeholder, never an empty box */}
       <div className="aspect-video" style={{ margin: 20, borderRadius: 16, background: 'rgb(6,8,14)', border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', position: 'relative' }}>
         {p.coverImageUrl ? (
-          <img src={p.coverImageUrl} alt={p.name} className="absolute inset-0 w-full h-full object-cover" />
+          <img src={p.coverImageUrl} alt={p.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" />
         ) : (
           <div style={{ position: 'absolute', inset: 0, background: STRIPES, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'center', padding: '0 16px' }}>{p.name || 'Untitled project'}</span>
@@ -41,8 +43,8 @@ export default function ProjectCard({ p, i }: { p: Project; i: number }) {
           <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 500, fontSize: 11, letterSpacing: '0.04em', color: M, textTransform: 'uppercase', padding: '6px 12px', borderRadius: 100, background: 'rgba(255,255,255,0.06)' }}>
             {p.role || p.name}
           </span>
-          <a href={`#/project/${p.slug}`} style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 600, fontSize: 13, letterSpacing: '0.04em', color: A, textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            {PROJECT_TYPE_LABELS[p.type]} ↗
+          <a href={`#/project/${p.slug}`} className="flex items-center gap-1" style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 600, fontSize: 13, letterSpacing: '0.04em', color: A, textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            {PROJECT_TYPE_LABELS[p.type]} <span className="inline-block transition-transform duration-500 ease-out group-hover:translate-x-1 group-hover:-translate-y-1">↗</span>
           </a>
         </div>
       </div>
