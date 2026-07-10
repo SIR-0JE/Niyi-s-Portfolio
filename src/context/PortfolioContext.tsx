@@ -117,6 +117,9 @@ export interface Project {
   outcomes: ProjectStat[]
   reflection: string
 
+  gallery?: { url: string; caption: string }[]
+  galleryLayout?: 'grid' | 'horizontal'
+
   sections: ProjectSections
 }
 
@@ -139,6 +142,7 @@ export function emptyProject(slug: string, type: ProjectType = 'case-study'): Pr
     coverImageUrl: '', processImageUrl: '', liveUrl: '', behanceUrl: 'https://behance.net',
     category: '', categoryTag: '',
     stats: [], problem: '', research: '', process: [], outcomes: [], reflection: '',
+    gallery: [], galleryLayout: type === 'ui' ? 'horizontal' : 'grid',
     sections: { ...DEFAULT_SECTIONS_BY_TYPE[type] },
   }
 }
@@ -160,10 +164,10 @@ export interface PortfolioContent {
 ───────────────────────────────────────────── */
 const DEFAULT_PROJECTS: Project[] = [
   {
-    slug: 'the-gaffer',
+    slug: 'gaffer',
     type: 'case-study',
     badge: 'personal',
-    featured: true,
+    featured: false,
     name: 'The Gaffer',
     headline: 'Giving local competitions the fixtures, standings, and fantasy experience that big leagues get — designed to turn scattered matches into an event people follow.',
     role: 'Founder & Product Designer',

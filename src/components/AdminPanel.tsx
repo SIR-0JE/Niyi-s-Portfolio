@@ -91,6 +91,77 @@ function ImgField({ label: lbl, value, onChange }: { label: string; value: strin
   )
 }
 
+/* ── Gallery Manager ── */
+function GalleryManager({ 
+  gallery = [], 
+  layout = 'grid', 
+  onChange 
+}: { 
+  gallery?: { url: string; caption: string }[]; 
+  layout?: 'grid' | 'horizontal'; 
+  onChange: (patch: { gallery?: { url: string; caption: string }[]; galleryLayout?: 'grid' | 'horizontal' }) => void 
+}) {
+  const [isUploading, setIsUploading] = useState(false)
+  
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    setIsUploading(true)
+    const url = await uploadImage(f)
+    if (url) {
+      onChange({ gallery: [...gallery, { url, caption: '' }] })
+    } else {
+      alert('Failed to upload image. Please ensure your Supabase credentials are correct.')
+    }
+    setIsUploading(false)
+  }
+
+  const move = (i: number, dir: number) => {
+    const newG = [...gallery]
+    const tmp = newG[i]
+    newG[i] = newG[i + dir]
+    newG[i + dir] = tmp
+    onChange({ gallery: newG })
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        <span style={label}>Gallery Layout:</span>
+        <select 
+          value={layout} 
+          onChange={e => onChange({ galleryLayout: e.target.value as 'grid' | 'horizontal' })}
+          style={{ ...input, width: 'auto', padding: '6px 12px' }}
+        >
+          <option value="grid">Grid (Web UIs)</option>
+          <option value="horizontal">Horizontal (App UIs)</option>
+        </select>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {gallery.map((g, i) => (
+          <div key={i} style={{ display: 'flex', gap: 12, background: 'rgba(255,255,255,0.02)', padding: 12, borderRadius: 12, border: `1px solid ${T.border}`, alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <button onClick={() => move(i, -1)} disabled={i === 0} style={{ background: 'none', border: 'none', color: i === 0 ? 'rgba(255,255,255,0.15)' : T.muted, cursor: i === 0 ? 'default' : 'pointer', fontSize: 12, padding: 2 }}>▲</button>
+              <button onClick={() => move(i, 1)} disabled={i === gallery.length - 1} style={{ background: 'none', border: 'none', color: i === gallery.length - 1 ? 'rgba(255,255,255,0.15)' : T.muted, cursor: i === gallery.length - 1 ? 'default' : 'pointer', fontSize: 12, padding: 2 }}>▼</button>
+            </div>
+            <img src={g.url} alt="Gallery item" style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 8, background: '#000' }} />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Inp value={g.caption} onChange={v => { const newG = [...gallery]; newG[i].caption = v; onChange({ gallery: newG }) }} placeholder="Image caption..." />
+            </div>
+            <Ghost onClick={() => { const newG = gallery.filter((_, j) => j !== i); onChange({ gallery: newG }) }}>×</Ghost>
+          </div>
+        ))}
+      </div>
+
+      <label style={{ ...label, marginBottom: 0, display: 'flex', alignItems: 'center', gap: 8, cursor: isUploading ? 'not-allowed' : 'pointer', padding: '12px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, border: `1px dashed ${T.border}`, opacity: isUploading ? 0.5 : 1, justifyContent: 'center' }}>
+        {isUploading ? '⏳ Uploading to Cloud...' : '📎 Add Gallery Image'}
+        <input type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} disabled={isUploading} />
+      </label>
+    </div>
+  )
+}
+
 /* ─────────────────────────────────────────────
    SECTION EDITORS
 ───────────────────────────────────────────── */
@@ -544,6 +615,13 @@ function ProjectsEditor() {
           <ImgField label="Cover image (card thumbnail + detail page hero)" value={p.coverImageUrl} onChange={v => upd(active, { coverImageUrl: v })} />
           <Divider />
           <ImgField label="Process / wireframes image (mid-page, optional)" value={p.processImageUrl} onChange={v => upd(active, { processImageUrl: v })} />
+          <Divider />
+          <SecHead title="High-Fidelity Gallery" sub="Add multiple screens here. Grid layout is great for Web UIs; Horizontal scroll is great for Mobile App UIs." />
+          <GalleryManager 
+            gallery={p.gallery} 
+            layout={p.galleryLayout} 
+            onChange={patch => upd(active, patch)} 
+          />
         </div>
       )}
     </div>

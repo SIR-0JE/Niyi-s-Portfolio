@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Footer from '../components/Footer'
 import LiveProjectButton from '../components/LiveProjectButton'
@@ -172,6 +172,9 @@ function ProjectDetailPage({ p }: { p: Project }) {
         </Sec>
       )}
 
+      {/* Gallery */}
+      <HighFidelityGallery p={p} />
+
       {/* Closing CTA */}
       <Sec>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
@@ -197,6 +200,101 @@ function NotFound({ slug }: { slug: string }) {
       <p>Project <code>{slug}</code> not found in Admin.</p>
       <a href="#/projects" style={{ color: A }}>← All projects</a>
     </div>
+  )
+}
+
+function HighFidelityGallery({ p }: { p: Project }) {
+  const g = p.gallery
+  if (!g || g.length === 0) return null
+
+  const layout = p.galleryLayout || 'grid'
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
+  
+  // Accessibility: Close on Esc
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIdx(null)
+    }
+    if (lightboxIdx !== null) {
+      window.addEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = 'hidden' // trap scroll
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [lightboxIdx])
+
+  const openLightbox = (i: number) => setLightboxIdx(i)
+
+  return (
+    <Sec>
+      <style>{`.hide-scroll::-webkit-scrollbar { display: none; }`}</style>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <span style={sectionTitle}>High-Fidelity Gallery</span>
+        
+        {layout === 'horizontal' ? (
+          <div className="hide-scroll flex overflow-x-auto snap-x snap-mandatory" style={{ gap: 24, paddingBottom: 16, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {g.map((img, i) => (
+              <div key={i} className="snap-center shrink-0" style={{ width: '80%', maxWidth: 360 }}>
+                <img src={img.url} alt={img.caption || `Gallery image ${i + 1}`} loading="lazy" style={{ width: '100%', height: 'auto', borderRadius: 16, border: '1px solid rgba(255,255,255,0.1)' }} />
+                {img.caption && <p style={{ fontFamily: 'Poppins,sans-serif', fontSize: 14, color: M, marginTop: 12, textAlign: 'center' }}>{img.caption}</p>}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {g.map((img, i) => (
+              <button 
+                key={i} 
+                onClick={() => openLightbox(i)} 
+                className="group relative flex flex-col items-center text-left"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'zoom-in' }}
+                aria-label={`View full screen image ${i + 1}`}
+              >
+                <div style={{ borderRadius: 16, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', width: '100%' }}>
+                  <img src={img.url} alt={img.caption || `Gallery image ${i + 1}`} loading="lazy" className="w-full h-auto transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:transform-none" style={{ display: 'block' }} />
+                </div>
+                {img.caption && <p style={{ fontFamily: 'Poppins,sans-serif', fontSize: 14, color: M, marginTop: 12, width: '100%' }}>{img.caption}</p>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Lightbox */}
+      {lightboxIdx !== null && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md" 
+          onClick={() => setLightboxIdx(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button 
+            onClick={() => setLightboxIdx(null)} 
+            aria-label="Close lightbox"
+            style={{ position: 'absolute', top: 24, right: 24, background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: 48, height: 48, color: '#fff', fontSize: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}
+          >
+            ×
+          </button>
+          
+          <div className="relative max-w-[90vw] max-h-[90vh] flex flex-col items-center" onClick={e => e.stopPropagation()}>
+            <img 
+              src={g[lightboxIdx].url} 
+              alt={g[lightboxIdx].caption || `Gallery image ${lightboxIdx + 1}`} 
+              className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl" 
+            />
+            {g[lightboxIdx].caption && (
+              <p style={{ fontFamily: 'Poppins,sans-serif', fontSize: 16, color: '#fff', marginTop: 16, textAlign: 'center', background: 'rgba(0,0,0,0.5)', padding: '8px 16px', borderRadius: 100 }}>
+                {g[lightboxIdx].caption}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </Sec>
   )
 }
 
