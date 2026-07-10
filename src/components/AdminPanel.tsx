@@ -4,6 +4,7 @@ import type {
   HeroContent, ExpertiseCard,
   FAQItem, TestimonialItem, ExperienceItem, Project, ProjectType, ProjectBadge, ProjectStat, ProjectProcessStep
 } from '../context/PortfolioContext'
+import { uploadImage } from '../lib/supabase'
 
 /* ── Design tokens ── */
 const T = {
@@ -62,42 +63,29 @@ function Divider() { return <div style={{ height: 1, background: T.border, margi
 
 /* ── Image upload + URL input ── */
 function ImgField({ label: lbl, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isUploading, setIsUploading] = useState(false)
+  
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
     if (!f) return
-    const r = new FileReader()
-    r.onload = ev => {
-      if (ev.target?.result) {
-        // Resize image to prevent localStorage QuotaExceededError
-        const img = new Image()
-        img.onload = () => {
-          const canvas = document.createElement('canvas')
-          const MAX = 1200
-          let w = img.width
-          let h = img.height
-          if (w > MAX || h > MAX) {
-            if (w > h) { h *= MAX / w; w = MAX }
-            else { w *= MAX / h; h = MAX }
-          }
-          canvas.width = w
-          canvas.height = h
-          const ctx = canvas.getContext('2d')
-          ctx?.drawImage(img, 0, 0, w, h)
-          onChange(canvas.toDataURL('image/jpeg', 0.8)) // 80% quality JPEG saves massive space
-        }
-        img.src = ev.target.result as string
-      }
+    setIsUploading(true)
+    const url = await uploadImage(f)
+    if (url) {
+      onChange(url)
+    } else {
+      alert('Failed to upload image. Please ensure your Supabase credentials are correct and the bucket exists.')
     }
-    r.readAsDataURL(f)
+    setIsUploading(false)
   }
+  
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span style={label}>{lbl}</span>
       {value && <img src={value} alt={lbl} style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 10, border: `1px solid ${T.border}` }} />}
       <Inp value={value.startsWith('data:') ? '' : value} onChange={onChange} placeholder="Paste image URL..." />
-      <label style={{ ...label, marginBottom: 0, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '8px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, border: `1px dashed ${T.border}` }}>
-        📎 Upload local file
-        <input type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
+      <label style={{ ...label, marginBottom: 0, display: 'flex', alignItems: 'center', gap: 8, cursor: isUploading ? 'not-allowed' : 'pointer', padding: '8px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, border: `1px dashed ${T.border}`, opacity: isUploading ? 0.5 : 1 }}>
+        {isUploading ? '⏳ Uploading to Cloud...' : '📎 Upload high-res file'}
+        <input type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} disabled={isUploading} />
       </label>
     </div>
   )
