@@ -258,29 +258,47 @@ function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => v
     const result: Partial<Project> = {}
     
     let currentProcess: ProjectProcessStep[] = []
+    let currentOutcomes: { val: string; label: string }[] = []
+    let currentStats: { val: string; label: string }[] = []
     
-    const headers = ['slug', 'type', 'badge', 'name', 'title', 'headline', 'summary', 'hero summary', 'role', 'year', 'tools', 'coverimageurl', 'liveurl', 'behanceurl', 'problem', 'challenge', 'the problem', 'research', 'outcome', 'the outcome', 'results', 'reflection', 'process']
+    const headers = [
+      'slug', 'name', 'title', 'type', 'badge', 'featured',
+      'role', 'year', 'timeline', 'tools',
+      'category', 'category tag', 'cover image url', 'live url', 'behance url',
+      'headline', 'hero summary', 'summary',
+      'problem', 'challenge', 'the problem',
+      'research', 'process',
+      'outcome', 'outcomes', 'the outcome', 'results',
+      'reflection', 'stats'
+    ]
     
     let activeField: string | null = null
 
     const handleValue = (field: string, val: string, append = false) => {
       let key: keyof Project | null = null
+      
       if (['name', 'title'].includes(field)) key = 'name'
-      if (['headline', 'summary', 'hero summary'].includes(field)) key = 'headline'
+      if (['type'].includes(field)) key = 'type'
+      if (['slug', 'badge', 'role', 'category', 'research', 'reflection'].includes(field)) key = field as any
+      if (['featured'].includes(field)) {
+         result.featured = val.toLowerCase() === 'yes' || val.toLowerCase() === 'true'
+         return
+      }
+      if (['year', 'timeline'].includes(field)) key = 'year'
+      if (['category tag'].includes(field)) key = 'categoryTag'
+      if (['cover image url'].includes(field)) key = 'coverImageUrl'
+      if (['live url'].includes(field)) key = 'liveUrl'
+      if (['behance url'].includes(field)) key = 'behanceUrl'
+      if (['headline', 'hero summary', 'summary'].includes(field)) key = 'headline'
       if (['problem', 'challenge', 'the problem'].includes(field)) key = 'problem'
-      if (['outcome', 'the outcome', 'results', 'reflection'].includes(field)) key = 'reflection'
-      if (['slug', 'type', 'badge', 'role', 'year', 'research'].includes(field)) key = field as any
-      if (field === 'coverimageurl') key = 'coverImageUrl'
-      if (field === 'liveurl') key = 'liveUrl'
-      if (field === 'behanceurl') key = 'behanceUrl'
-
+      
       if (key) {
         if (append && result[key]) {
            (result as any)[key] += '\n' + val
         } else {
            (result as any)[key] = val
         }
-      } else if (field === 'tools') {
+      } else if (['tools'].includes(field)) {
         const cleaned = val.replace(/\[.*\]/, '').trim()
         if (append && result.tools) result.tools += ', ' + cleaned
         else result.tools = cleaned
@@ -293,15 +311,15 @@ function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => v
 
       const colonIdx = line.indexOf(':')
       let handledAsInline = false
+      
       if (colonIdx !== -1) {
         const potentialLabel = line.slice(0, colonIdx).trim().toLowerCase()
         if (headers.includes(potentialLabel)) {
           const val = line.slice(colonIdx + 1).trim()
           activeField = potentialLabel
-          if (val) {
-            handleValue(activeField, val)
-            handledAsInline = true
-          }
+          if (val) handleValue(activeField, val)
+          handledAsInline = true
+          continue
         }
       }
 
@@ -312,26 +330,57 @@ function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => v
           continue
         }
 
-        const processMatch = line.match(/^\d+\.\s+([^—-]+)[—-]+(.*)$/)
-        if (processMatch) {
-          currentProcess.push({ title: processMatch[1].trim(), body: processMatch[2].trim() })
-          activeField = 'process'
-          continue
+        if (activeField === 'process' || /^\d+\.\s+/.test(line)) {
+          const processMatch = line.match(/^\d+\.\s+([^—-]+)[—-]+(.*)$/)
+          if (processMatch) {
+            currentProcess.push({ title: processMatch[1].trim(), body: processMatch[2].trim() })
+            activeField = 'process'
+            continue
+          }
+        }
+        
+        if (['outcome', 'outcomes', 'the outcome', 'results', 'stats'].includes(activeField || '')) {
+           if (line.includes('|')) {
+             const [val, label] = line.split('|').map(s => s.trim())
+             if (['stats'].includes(activeField!)) {
+                currentStats.push({ val, label })
+             } else {
+                currentOutcomes.push({ val, label })
+             }
+             continue
+           }
         }
 
-        if (activeField && activeField !== 'process') {
+        if (activeField && !['process', 'outcome', 'outcomes', 'the outcome', 'results', 'stats'].includes(activeField)) {
           handleValue(activeField, line, true)
         }
       }
     }
 
-    if (currentProcess.length > 0) {
-      result.process = currentProcess
+    if (currentProcess.length > 0) result.process = currentProcess
+    if (currentOutcomes.length > 0) result.outcomes = currentOutcomes
+    if (currentStats.length > 0) result.stats = currentStats
+
+    const filledCount = Object.keys(result).filter(k => {
+      const v = (result as any)[k]
+      return Array.isArray(v) ? v.length > 0 : !!v
+    }).length
+
+    let expectedFields: string[] = []
+    const type = result.type || 'case-study'
+    
+    if (type === 'case-study') {
+      expectedFields = ['name', 'slug', 'headline', 'role', 'year', 'problem', 'research', 'process', 'outcomes']
+    } else if (type === 'landing-page') {
+      expectedFields = ['name', 'slug', 'headline', 'role', 'year', 'liveUrl']
+    } else if (type === 'ui') {
+      expectedFields = ['name', 'slug', 'role', 'year', 'tools', 'headline']
     }
 
-    const filledCount = Object.keys(result).length
-    const expectedFields = ['name', 'headline', 'role', 'year', 'tools', 'problem', 'research', 'process', 'reflection']
-    const missing = expectedFields.filter(f => !(result as any)[f] || ((result as any)[f] && (result as any)[f].length === 0))
+    const missing = expectedFields.filter(f => {
+      const v = (result as any)[f]
+      return Array.isArray(v) ? v.length === 0 : !v
+    })
     
     setSummary(`✅ Filled ${filledCount} fields. Missing: ${missing.join(', ') || 'None'}`)
     onResult(result)
@@ -343,7 +392,7 @@ function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => v
         <span>⚡</span>
         <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 14, color: T.accent }}>Quick Fill Parser</span>
       </div>
-      <p style={{ margin: 0, fontSize: 12, color: T.muted }}>Paste project text to auto-fill. Matches labels like 'Role:', 'Problem:', 'Research:'. Parses numbered lists (e.g. "1. Title — body") into Process steps.</p>
+      <p style={{ margin: 0, fontSize: 12, color: T.muted }}>Paste project text to auto-fill. Supports repeating fields ("1. Title — body" for Process, "val | label" for Outcomes).</p>
       <Ta value={text} onChange={setText} rows={4} placeholder="Paste project text here..." />
       
       <button onClick={handleParse} disabled={!text} style={{ background: T.accent, color: T.bg, border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: 'Poppins,sans-serif', cursor: !text ? 'not-allowed' : 'pointer', alignSelf: 'flex-start', opacity: !text ? 0.5 : 1 }}>
