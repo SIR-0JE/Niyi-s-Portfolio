@@ -40,15 +40,15 @@ function ProjectDetailPage({ p }: { p: Project }) {
 
   return (
     <div style={{ background: 'rgb(1,2,8)', minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingTop: 88 }}>
-      {/* Back to Projects */}
-      <div style={{ padding: '32px clamp(24px,5vw,100px) 0', boxSizing: 'border-box' }}>
-        <div style={{ maxWidth: 1240, margin: '0 auto', width: '100%' }}>
-          <a href="#/projects" className="inline-flex items-center gap-2 font-['Poppins',sans-serif] font-medium text-[14px] text-[rgb(203,203,203)] hover:text-[rgb(255,128,74)] transition-colors duration-200 no-underline" style={{ textDecoration: 'none' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      {/* Sticky Back Button */}
+      <div className="fixed z-40 pointer-events-none" style={{ top: 110, left: 0, right: 0, padding: '0 clamp(24px,5vw,100px)', boxSizing: 'border-box' }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto', width: '100%', display: 'flex' }}>
+          <a href="#/projects" className="pointer-events-auto inline-flex items-center gap-2 font-['Poppins',sans-serif] font-medium text-[13px] text-[rgb(203,203,203)] bg-[rgba(1,2,8,0.5)] backdrop-blur-md px-4 py-2 rounded-full border border-[rgba(255,255,255,0.1)] hover:text-[#fff] hover:border-[rgba(255,128,74,0.5)] transition-all duration-200 no-underline shadow-lg" style={{ textDecoration: 'none' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="19" y1="12" x2="5" y2="12"></line>
               <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
-            Back to all projects
+            Back
           </a>
         </div>
       </div>
