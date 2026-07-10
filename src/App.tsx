@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import ProjectsPage from './pages/ProjectsPage'
 import ContactPage from './pages/ContactPage'
-import { CaseStudyMindvox, CaseStudyVoterix, CaseStudyHealth4Moni, CaseStudyGaffer } from './pages/CaseStudies'
+import ProjectDetail from './pages/ProjectDetail'
 
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 
@@ -73,8 +73,19 @@ function CustomCursor() {
 }
 
 /* ── Router ── */
+// Old per-slug routes (#/case/:slug) now redirect silently to the unified #/project/:slug route.
+function normalizeRoute(hash: string): string {
+  const legacyMatch = hash.match(/^#\/case\/(.+)$/)
+  if (legacyMatch) return `#/project/${legacyMatch[1]}`
+  return hash || '#/'
+}
+
 function MainContent() {
-  const [route, setRoute] = useState(() => window.location.hash || '#/')
+  const [route, setRoute] = useState(() => {
+    const initial = normalizeRoute(window.location.hash)
+    if (initial !== window.location.hash) window.history.replaceState(null, '', initial)
+    return initial
+  })
 
   useEffect(() => {
     // If a user types /admin instead of /#/admin, redirect them to the hash version
@@ -83,7 +94,12 @@ function MainContent() {
       return
     }
 
-    const onChange = () => { setRoute(window.location.hash || '#/'); window.scrollTo({ top: 0, behavior: 'instant' }) }
+    const onChange = () => {
+      const normalized = normalizeRoute(window.location.hash)
+      if (normalized !== window.location.hash) window.history.replaceState(null, '', normalized)
+      setRoute(normalized)
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
     window.addEventListener('hashchange', onChange)
     return () => window.removeEventListener('hashchange', onChange)
   }, [])
@@ -91,14 +107,12 @@ function MainContent() {
   const isAdmin = route === '#/admin'
 
   const renderPage = () => {
-    if (isAdmin)                        return <AdminPanel />
-    if (route === '#/about')            return <AboutPage />
-    if (route === '#/projects')         return <ProjectsPage />
-    if (route === '#/contact')          return <ContactPage />
-    if (route === '#/case/mindvox')     return <CaseStudyMindvox />
-    if (route === '#/case/voterix')     return <CaseStudyVoterix />
-    if (route === '#/case/health4moni') return <CaseStudyHealth4Moni />
-    if (route === '#/case/gaffer')      return <CaseStudyGaffer />
+    if (isAdmin)                return <AdminPanel />
+    if (route === '#/about')    return <AboutPage />
+    if (route === '#/projects') return <ProjectsPage />
+    if (route === '#/contact')  return <ContactPage />
+    const projectMatch = route.match(/^#\/project\/(.+)$/)
+    if (projectMatch)           return <ProjectDetail slug={projectMatch[1]} />
     return <HomePage />
   }
 

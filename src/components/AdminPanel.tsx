@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { usePortfolio } from '../context/PortfolioContext'
+import { usePortfolio, PROJECT_TYPE_LABELS, DEFAULT_SECTIONS_BY_TYPE, emptyProject } from '../context/PortfolioContext'
 import type {
-  HeroContent, ExpertiseCard, FeaturedProject, Stat,
-  FAQItem, TestimonialItem, ExperienceItem, CaseStudyContent, ProcessStep, OutcomeCard, CaseStudyStat, OtherWorkItem
+  HeroContent, ExpertiseCard,
+  FAQItem, TestimonialItem, ExperienceItem, Project, ProjectType, ProjectBadge, ProjectStat, ProjectProcessStep
 } from '../context/PortfolioContext'
 
 /* ── Design tokens ── */
@@ -188,7 +188,8 @@ function ExpertiseEditor() {
   )
 }
 
-function MagicAIBox({ onResult }: { onResult: (data: Partial<FeaturedProject>) => void }) {
+interface MagicAIResult { name?: string; headline?: string; role?: string; stats?: { before: string; after: string; label: string }[] }
+function MagicAIBox({ onResult }: { onResult: (data: MagicAIResult) => void }) {
   const [prompt, setPrompt] = useState('')
   const [engine, setEngine] = useState<'gemini' | 'gemini-pro' | 'claude'>('gemini')
   const [loading, setLoading] = useState(false)
@@ -231,56 +232,6 @@ function MagicAIBox({ onResult }: { onResult: (data: Partial<FeaturedProject>) =
       <button onClick={handleGenerate} disabled={loading || !prompt} style={{ background: T.accent, color: T.bg, border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: 'Poppins,sans-serif', cursor: loading || !prompt ? 'not-allowed' : 'pointer', alignSelf: 'flex-start', opacity: loading || !prompt ? 0.5 : 1 }}>
         {loading ? `⟳ ${engine.startsWith('gemini') ? 'Gemini' : 'Claude'} is thinking...` : '✨ Auto-Fill Fields'}
       </button>
-    </div>
-  )
-}
-
-function FeaturedProjectsEditor() {
-  const { data, setNested } = usePortfolio()
-  const projs = data.featuredProjects
-
-  const updProj = (i: number, patch: Partial<FeaturedProject>) => {
-    const p = [...projs]; p[i] = { ...p[i], ...patch }; setNested('featuredProjects', p)
-  }
-  const updStat = (pi: number, si: number, patch: Partial<Stat>) => {
-    const p = [...projs]
-    const stats = [...p[pi].stats]; stats[si] = { ...stats[si], ...patch }
-    p[pi] = { ...p[pi], stats }; setNested('featuredProjects', p)
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <SecHead title="Featured Projects (Home)" sub="The project cards shown on the home page" />
-      {projs.map((proj, i) => (
-        <div key={i} style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={row}>
-            <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: T.text, flex: 1 }}>{proj.name || `Project ${i + 1}`}</span>
-            <Ghost onClick={() => setNested('featuredProjects', projs.filter((_, j) => j !== i))}>Remove</Ghost>
-          </div>
-          <MagicAIBox onResult={data => updProj(i, data)} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label="Project name"><Inp value={proj.name} onChange={v => updProj(i, { name: v })} /></Field>
-            <Field label="Route / href"><Inp value={proj.href} onChange={v => updProj(i, { href: v })} /></Field>
-          </div>
-          <ImgField label="Project Cover Image" value={proj.imageUrl || ''} onChange={v => updProj(i, { imageUrl: v })} />
-          <Field label="Card headline"><Ta value={proj.headline} onChange={v => updProj(i, { headline: v })} rows={2} /></Field>
-          <Field label="Role badge"><Inp value={proj.role} onChange={v => updProj(i, { role: v })} /></Field>
-          <Divider />
-          <span style={label}>Stats</span>
-          {proj.stats.map((s, si) => (
-            <div key={si} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 10, alignItems: 'end' }}>
-              <Field label="Before"><Inp value={s.before} onChange={v => updStat(i, si, { before: v })} /></Field>
-              <Field label="After (orange)"><Inp value={s.after} onChange={v => updStat(i, si, { after: v })} /></Field>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-                <Field label="Label"><Inp value={s.label} onChange={v => updStat(i, si, { label: v })} /></Field>
-                <Ghost onClick={() => { const stats = proj.stats.filter((_, j) => j !== si); updProj(i, { stats }) }}>×</Ghost>
-              </div>
-            </div>
-          ))}
-          <Btn onClick={() => updProj(i, { stats: [...proj.stats, { before: '', after: '', label: '' }] })}>+ Stat</Btn>
-        </div>
-      ))}
-      <Btn onClick={() => setNested('featuredProjects', [...projs, { name: '', href: '#/projects', headline: '', role: '', stats: [] }])}>+ Add Project Card</Btn>
     </div>
   )
 }
@@ -406,53 +357,67 @@ function AboutEditor() {
   )
 }
 
-function CaseStudyEditor() {
-  const { data, setNested } = usePortfolio()
-  const studies = data.caseStudies
-  const [active, setActive] = useState<number | null>(null)
-  const [subTab, setSubTab] = useState<'meta' | 'problem' | 'process' | 'outcomes' | 'images'>('meta')
+const SECTION_KEYS = ['problem', 'research', 'process', 'outcome', 'reflection'] as const
 
-  const upd = (i: number, patch: Partial<CaseStudyContent>) => {
-    const a = [...studies]; a[i] = { ...a[i], ...patch }; setNested('caseStudies', a)
+function ProjectsEditor() {
+  const { data, setNested } = usePortfolio()
+  const projects = data.projects
+  const [active, setActive] = useState<number | null>(null)
+  const [subTab, setSubTab] = useState<'meta' | 'content' | 'sections' | 'images'>('meta')
+
+  const upd = (i: number, patch: Partial<Project>) => {
+    const a = [...projects]; a[i] = { ...a[i], ...patch }; setNested('projects', a)
   }
-  const updStat = (ci: number, si: number, patch: Partial<CaseStudyStat>) => {
-    const a = [...studies[ci].stats]; a[si] = { ...a[si], ...patch }; upd(ci, { stats: a })
+  const updListItem = (i: number, key: 'stats' | 'outcomes', si: number, patch: Partial<ProjectStat>) => {
+    const a = [...projects[i][key]]; a[si] = { ...a[si], ...patch }; upd(i, { [key]: a } as Partial<Project>)
   }
-  const updStep = (ci: number, pi: number, patch: Partial<ProcessStep>) => {
-    const a = [...studies[ci].process]; a[pi] = { ...a[pi], ...patch }; upd(ci, { process: a })
+  const updStep = (i: number, si: number, patch: Partial<ProjectProcessStep>) => {
+    const a = [...projects[i].process]; a[si] = { ...a[si], ...patch }; upd(i, { process: a })
   }
-  const updOutcome = (ci: number, oi: number, patch: Partial<OutcomeCard>) => {
-    const a = [...studies[ci].outcomes]; a[oi] = { ...a[oi], ...patch }; upd(ci, { outcomes: a })
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir
+    if (j < 0 || j >= projects.length) return
+    const a = [...projects]
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp
+    setNested('projects', a)
   }
+  const changeType = (i: number, type: ProjectType) => upd(i, { type, sections: { ...DEFAULT_SECTIONS_BY_TYPE[type] } })
 
   if (active === null) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SecHead title="Case Studies" sub="Edit all content for each case study page" />
-        {studies.map((s, i) => (
-          <div key={i} style={{ ...card, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: T.text }}>{s.headline.slice(0, 60)}…</div>
-              <div style={{ fontFamily: 'Poppins,sans-serif', fontSize: 12, color: T.accent, marginTop: 4 }}>{s.category} · /{s.slug}</div>
+        <SecHead title="Projects" sub="One list drives everything — Home's Featured Work and the Projects grid both read from here. Reorder, add, remove, or edit any project below." />
+        {projects.map((p, i) => (
+          <div key={p.slug} style={{ ...card, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <button onClick={() => move(i, -1)} disabled={i === 0} style={{ background: 'none', border: 'none', color: i === 0 ? 'rgba(255,255,255,0.15)' : T.muted, cursor: i === 0 ? 'default' : 'pointer', fontSize: 12, padding: 2 }}>▲</button>
+              <button onClick={() => move(i, 1)} disabled={i === projects.length - 1} style={{ background: 'none', border: 'none', color: i === projects.length - 1 ? 'rgba(255,255,255,0.15)' : T.muted, cursor: i === projects.length - 1 ? 'default' : 'pointer', fontSize: 12, padding: 2 }}>▼</button>
+            </div>
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: T.text }}>{p.name || p.slug}</div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 11, fontFamily: 'Poppins,sans-serif', fontWeight: 600, color: T.accent, border: `1px solid ${T.accentBorder}`, borderRadius: 100, padding: '2px 10px' }}>{PROJECT_TYPE_LABELS[p.type]}</span>
+                <span style={{ fontSize: 11, fontFamily: 'Poppins,sans-serif', fontWeight: 600, color: T.muted, border: `1px solid ${T.border}`, borderRadius: 100, padding: '2px 10px' }}>{p.badge === 'client' ? 'Client' : 'Personal'}</span>
+                {p.featured && <span style={{ fontSize: 11, fontFamily: 'Poppins,sans-serif', fontWeight: 600, color: T.success, border: '1px solid rgba(34,197,94,0.3)', borderRadius: 100, padding: '2px 10px' }}>Featured</span>}
+              </div>
             </div>
             <Btn onClick={() => { setActive(i); setSubTab('meta') }}>Edit →</Btn>
           </div>
         ))}
-        <Btn onClick={() => setNested('caseStudies', [...studies, {
-          slug: 'new-project', category: 'New Category', headline: 'New project headline', stats: [], role: '', timeline: '', categoryTag: '', problem: '', process: [], outcomes: [], behanceUrl: 'https://behance.net', liveUrl: '', coverImageUrl: '', processImageUrl: ''
-        }])}>+ Add Case Study</Btn>
+        <Btn onClick={() => setNested('projects', [...projects, emptyProject(`new-project-${projects.length + 1}`)])}>+ Add Project</Btn>
       </div>
     )
   }
 
-  const cs = studies[active]
-  const TABS = ['meta', 'problem', 'process', 'outcomes', 'images'] as const
+  const p = projects[active]
+  const TABS = ['meta', 'content', 'sections', 'images'] as const
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <button onClick={() => setActive(null)} style={{ background: 'none', border: 'none', color: T.muted, fontFamily: 'Poppins,sans-serif', fontSize: 13, cursor: 'pointer' }}>← Back</button>
-        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 18, color: T.text }}>{cs.category}</span>
-        <Ghost onClick={() => { setNested('caseStudies', studies.filter((_, j) => j !== active)); setActive(null) }}>Delete Case Study</Ghost>
+        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 18, color: T.text }}>{p.name || p.slug}</span>
+        <Ghost onClick={() => { setNested('projects', projects.filter((_, j) => j !== active)); setActive(null) }}>Delete Project</Ghost>
       </div>
       {/* Sub-tabs */}
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', borderBottom: `1px solid ${T.border}`, paddingBottom: 12 }}>
@@ -465,108 +430,134 @@ function CaseStudyEditor() {
 
       {/* META */}
       {subTab === 'meta' && (
-        <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label="URL slug (no spaces)"><Inp value={cs.slug} onChange={v => upd(active, { slug: v })} /></Field>
-            <Field label="Category label (orange)"><Inp value={cs.category} onChange={v => upd(active, { category: v })} /></Field>
-            <Field label="Role"><Inp value={cs.role} onChange={v => upd(active, { role: v })} /></Field>
-            <Field label="Timeline"><Inp value={cs.timeline} onChange={v => upd(active, { timeline: v })} /></Field>
-            <Field label="Context tag (grid)"><Inp value={cs.categoryTag} onChange={v => upd(active, { categoryTag: v })} /></Field>
-            <Field label="Behance URL"><Inp value={cs.behanceUrl} onChange={v => upd(active, { behanceUrl: v })} /></Field>
-            <Field label="Live site URL (leave empty to hide button)"><Inp value={cs.liveUrl} onChange={v => upd(active, { liveUrl: v })} /></Field>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <MagicAIBox onResult={d => upd(active, {
+            name: d.name ?? p.name,
+            headline: d.headline ?? p.headline,
+            role: d.role ?? p.role,
+            stats: d.stats?.length ? d.stats.map(s => ({ val: `${s.before} → ${s.after}`, label: s.label })) : p.stats,
+          })} />
+          <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <Field label="URL slug (no spaces)"><Inp value={p.slug} onChange={v => upd(active, { slug: v })} /></Field>
+              <Field label="Project name"><Inp value={p.name} onChange={v => upd(active, { name: v })} /></Field>
+              <Field label="Type (picks template + card tag)">
+                <select value={p.type} onChange={e => changeType(active, e.target.value as ProjectType)} style={inp}>
+                  <option value="case-study">Case Study</option>
+                  <option value="landing-page">Landing Page</option>
+                  <option value="ui">UI Exploration</option>
+                </select>
+              </Field>
+              <Field label="Badge (ownership label, card only)">
+                <select value={p.badge} onChange={e => upd(active, { badge: e.target.value as ProjectBadge })} style={inp}>
+                  <option value="personal">Personal</option>
+                  <option value="client">Client</option>
+                </select>
+              </Field>
+              <Field label="Role"><Inp value={p.role} onChange={v => upd(active, { role: v })} /></Field>
+              <Field label="Year / timeline"><Inp value={p.year} onChange={v => upd(active, { year: v })} /></Field>
+              <Field label="Tools (comma-separated)"><Inp value={p.tools} onChange={v => upd(active, { tools: v })} /></Field>
+              <Field label="Category (eyebrow above headline)"><Inp value={p.category} onChange={v => upd(active, { category: v })} /></Field>
+              <Field label="Category tag (short, meta row)"><Inp value={p.categoryTag} onChange={v => upd(active, { categoryTag: v })} /></Field>
+              <Field label="Behance URL"><Inp value={p.behanceUrl} onChange={v => upd(active, { behanceUrl: v })} /></Field>
+              <Field label="Live site URL (leave empty to hide button)"><Inp value={p.liveUrl} onChange={v => upd(active, { liveUrl: v })} /></Field>
+            </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <input type="checkbox" checked={p.featured} onChange={e => upd(active, { featured: e.target.checked })} />
+              <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: 13, color: T.text }}>Featured on Home page</span>
+            </label>
           </div>
-          <Field label="Main headline"><Ta value={cs.headline} onChange={v => upd(active, { headline: v })} rows={2} /></Field>
+        </div>
+      )}
+
+      {/* CONTENT */}
+      {subTab === 'content' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={card}>
+            <Field label="Headline"><Ta value={p.headline} onChange={v => upd(active, { headline: v })} rows={2} /></Field>
+          </div>
+
+          <div style={card}>
+            <span style={label}>Hero Stats (small row, always visible regardless of section toggles)</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
+              {p.stats.map((s, si) => (
+                <div key={si} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10, alignItems: 'end' }}>
+                  <Field label="Value"><Inp value={s.val} onChange={v => updListItem(active, 'stats', si, { val: v })} /></Field>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Field label="Label"><Inp value={s.label} onChange={v => updListItem(active, 'stats', si, { label: v })} /></Field>
+                    <Ghost onClick={() => upd(active, { stats: p.stats.filter((_, j) => j !== si) })}>×</Ghost>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 10 }}><Btn onClick={() => upd(active, { stats: [...p.stats, { val: '', label: '' }] })}>+ Stat</Btn></div>
+          </div>
+
+          <div style={card}>
+            <Field label="Problem"><Ta value={p.problem} onChange={v => upd(active, { problem: v })} rows={4} /></Field>
+          </div>
+
+          <div style={card}>
+            <Field label="Research"><Ta value={p.research} onChange={v => upd(active, { research: v })} rows={4} /></Field>
+          </div>
+
+          <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <span style={label}>Process Steps</span>
+            {p.process.map((step, si) => (
+              <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 14, borderBottom: `1px solid ${T.border}` }}>
+                <div style={row}>
+                  <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 14, color: T.accent, flex: 1 }}>Step {si + 1}</span>
+                  <Ghost onClick={() => upd(active, { process: p.process.filter((_, j) => j !== si) })}>Remove</Ghost>
+                </div>
+                <Field label="Title"><Inp value={step.title} onChange={v => updStep(active, si, { title: v })} /></Field>
+                <Field label="Body"><Ta value={step.body} onChange={v => updStep(active, si, { body: v })} rows={2} /></Field>
+              </div>
+            ))}
+            <Btn onClick={() => upd(active, { process: [...p.process, { title: '', body: '' }] })}>+ Add Step</Btn>
+          </div>
+
+          <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <span style={label}>Outcomes</span>
+            {p.outcomes.map((o, oi) => (
+              <div key={oi} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10, alignItems: 'end' }}>
+                <Field label="Value"><Inp value={o.val} onChange={v => updListItem(active, 'outcomes', oi, { val: v })} /></Field>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Field label="Label"><Inp value={o.label} onChange={v => updListItem(active, 'outcomes', oi, { label: v })} /></Field>
+                  <Ghost onClick={() => upd(active, { outcomes: p.outcomes.filter((_, j) => j !== oi) })}>×</Ghost>
+                </div>
+              </div>
+            ))}
+            <Btn onClick={() => upd(active, { outcomes: [...p.outcomes, { val: '', label: '' }] })}>+ Add Outcome</Btn>
+          </div>
+
+          <div style={card}>
+            <Field label="Reflection"><Ta value={p.reflection} onChange={v => upd(active, { reflection: v })} rows={4} /></Field>
+          </div>
+        </div>
+      )}
+
+      {/* SECTIONS */}
+      {subTab === 'sections' && (
+        <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <p style={{ margin: 0, fontSize: 13, color: T.muted, lineHeight: 1.6 }}>Toggle which sections render on this project's page. A section only shows if it's switched on here <em>and</em> has content filled in on the Content tab.</p>
           <Divider />
-          <span style={label}>Hero Stats (the 3 big numbers)</span>
-          {cs.stats.map((s, si) => (
-            <div key={si} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10, alignItems: 'end' }}>
-              <Field label="Value"><Inp value={s.val} onChange={v => updStat(active, si, { val: v })} /></Field>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Field label="Label"><Inp value={s.label} onChange={v => updStat(active, si, { label: v })} /></Field>
-                <Ghost onClick={() => upd(active, { stats: cs.stats.filter((_, j) => j !== si) })}>×</Ghost>
-              </div>
-            </div>
+          {SECTION_KEYS.map(key => (
+            <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+              <input type="checkbox" checked={p.sections[key]} onChange={e => upd(active, { sections: { ...p.sections, [key]: e.target.checked } })} />
+              <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: 14, color: T.text, textTransform: 'capitalize' }}>{key}</span>
+            </label>
           ))}
-          <Btn onClick={() => upd(active, { stats: [...cs.stats, { val: '', label: '' }] })}>+ Stat</Btn>
-        </div>
-      )}
-
-      {/* PROBLEM */}
-      {subTab === 'problem' && (
-        <div style={card}>
-          <Field label="The Problem text"><Ta value={cs.problem} onChange={v => upd(active, { problem: v })} rows={6} /></Field>
-        </div>
-      )}
-
-      {/* PROCESS */}
-      {subTab === 'process' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {cs.process.map((step, pi) => (
-            <div key={pi} style={{ ...card, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={row}>
-                <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: T.accent, flex: 1 }}>Step {pi + 1}</span>
-                <Ghost onClick={() => upd(active, { process: cs.process.filter((_, j) => j !== pi) })}>Remove</Ghost>
-              </div>
-              <Field label="Step title"><Inp value={step.title} onChange={v => updStep(active, pi, { title: v })} /></Field>
-              <Field label="Step description"><Ta value={step.body} onChange={v => updStep(active, pi, { body: v })} rows={3} /></Field>
-            </div>
-          ))}
-          <Btn onClick={() => upd(active, { process: [...cs.process, { title: '', body: '' }] })}>+ Add Step</Btn>
-        </div>
-      )}
-
-      {/* OUTCOMES */}
-      {subTab === 'outcomes' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {cs.outcomes.map((o, oi) => (
-            <div key={oi} style={{ ...card, display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12, alignItems: 'end' }}>
-              <Field label="Value (large orange)"><Inp value={o.val} onChange={v => updOutcome(active, oi, { val: v })} /></Field>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Field label="Label"><Inp value={o.label} onChange={v => updOutcome(active, oi, { label: v })} /></Field>
-                <Ghost onClick={() => upd(active, { outcomes: cs.outcomes.filter((_, j) => j !== oi) })}>×</Ghost>
-              </div>
-            </div>
-          ))}
-          <Btn onClick={() => upd(active, { outcomes: [...cs.outcomes, { val: '', label: '' }] })}>+ Add Outcome</Btn>
         </div>
       )}
 
       {/* IMAGES */}
       {subTab === 'images' && (
         <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <ImgField label="Hero cover image (top of case study)" value={cs.coverImageUrl} onChange={v => upd(active, { coverImageUrl: v })} />
+          <ImgField label="Cover image (card thumbnail + detail page hero)" value={p.coverImageUrl} onChange={v => upd(active, { coverImageUrl: v })} />
           <Divider />
-          <ImgField label="Process / wireframes image (mid-page)" value={cs.processImageUrl} onChange={v => upd(active, { processImageUrl: v })} />
+          <ImgField label="Process / wireframes image (mid-page, optional)" value={p.processImageUrl} onChange={v => upd(active, { processImageUrl: v })} />
         </div>
       )}
-    </div>
-  )
-}
-
-function OtherWorkEditor() {
-  const { data, setNested } = usePortfolio()
-  const items = data.otherWork
-  const upd = (i: number, patch: Partial<OtherWorkItem>) => {
-    const a = [...items]; a[i] = { ...a[i], ...patch }; setNested('otherWork', a)
-  }
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <SecHead title="Other Work" sub="Lightweight visual gallery on the Projects page — landing pages, screens, explorations. Each card links straight out to its Behance project." />
-      {items.map((item, i) => (
-        <div key={i} style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={row}>
-            <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 16, color: T.text, flex: 1 }}>{item.title || `Item ${i + 1}`}</span>
-            <Ghost onClick={() => setNested('otherWork', items.filter((_, j) => j !== i))}>Remove</Ghost>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field label="Title"><Inp value={item.title} onChange={v => upd(i, { title: v })} /></Field>
-            <Field label="Tag (e.g. Landing Page)"><Inp value={item.tag} onChange={v => upd(i, { tag: v })} /></Field>
-          </div>
-          <ImgField label="Cover Image" value={item.imageUrl} onChange={v => upd(i, { imageUrl: v })} />
-          <Field label="Behance / Dribbble project URL"><Inp value={item.externalUrl} onChange={v => upd(i, { externalUrl: v })} /></Field>
-        </div>
-      ))}
-      <Btn onClick={() => setNested('otherWork', [...items, { title: '', tag: '', imageUrl: '', externalUrl: 'https://behance.net' }])}>+ Add Item</Btn>
     </div>
   )
 }
@@ -574,18 +565,16 @@ function OtherWorkEditor() {
 /* ─────────────────────────────────────────────
    SIDEBAR TABS CONFIG
 ───────────────────────────────────────────── */
-type TabKey = 'navbar' | 'hero' | 'expertise' | 'featured' | 'testimonials' | 'faq' | 'footer' | 'about' | 'casestudies' | 'otherwork'
+type TabKey = 'navbar' | 'hero' | 'expertise' | 'projects' | 'testimonials' | 'faq' | 'footer' | 'about'
 const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'navbar',       label: 'Navbar',          icon: '⚓' },
   { key: 'hero',        label: 'Hero',             icon: '🏠' },
   { key: 'expertise',   label: 'Expertise',        icon: '🔧' },
-  { key: 'featured',    label: 'Featured Work',    icon: '💼' },
+  { key: 'projects',    label: 'Projects',         icon: '💼' },
   { key: 'testimonials',label: 'Testimonials',     icon: '💬' },
   { key: 'faq',         label: 'FAQ',              icon: '❓' },
   { key: 'footer',      label: 'Footer',           icon: '🔗' },
   { key: 'about',       label: 'About + Exp.',     icon: '👤' },
-  { key: 'casestudies', label: 'Case Studies',     icon: '📋' },
-  { key: 'otherwork',   label: 'Other Work',       icon: '🖼️' },
 ]
 
 /* ─────────────────────────────────────────────
@@ -688,13 +677,11 @@ export default function AdminPanel() {
           {tab === 'navbar'       && <NavbarEditor />}
           {tab === 'hero'        && <HeroEditor />}
           {tab === 'expertise'   && <ExpertiseEditor />}
-          {tab === 'featured'    && <FeaturedProjectsEditor />}
+          {tab === 'projects'    && <ProjectsEditor />}
           {tab === 'testimonials' && <TestimonialsEditor />}
           {tab === 'faq'         && <FAQEditor />}
           {tab === 'footer'      && <FooterEditor />}
           {tab === 'about'       && <AboutEditor />}
-          {tab === 'casestudies' && <CaseStudyEditor />}
-          {tab === 'otherwork'   && <OtherWorkEditor />}
         </main>
       </div>
     </div>

@@ -2,55 +2,12 @@ import { useRef, useState } from 'react'
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import Testimonial from '../components/Testimonial'
 import Footer from '../components/Footer'
+import ProjectCard from '../components/ProjectCard'
 import { usePortfolio } from '../context/PortfolioContext'
 
 const ACCENT = 'rgb(255,128,74)'
 const MUTED = 'rgb(203,203,203)'
 const BG = 'rgb(1,2,8)'
-
-/* ── Project card ── */
-function ProjectCard({ proj, i }: { proj: ReturnType<typeof usePortfolio>['data']['featuredProjects'][0]; i: number }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, amount: 0.08 })
-  return (
-    <motion.div ref={ref} initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: i * 0.12 }}
-      whileHover={{ y: -8, borderColor: 'rgba(255,128,74,0.3)' }}
-      style={{ display: 'flex', flexDirection: 'column', borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden', transition: 'border-color 0.3s ease' }}>
-      <div style={{ margin: 20, minHeight: proj.imageUrl ? 'auto' : 400, borderRadius: 16, background: 'rgb(6,8,14)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
-        {proj.imageUrl ? (
-          <img src={proj.imageUrl} alt={proj.name} style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
-        ) : (
-          <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 'clamp(28px,4vw,44px)', color: 'rgba(255,255,255,0.14)', userSelect: 'none' }}>
-            Placeholder
-          </span>
-        )}
-      </div>
-      <div style={{ padding: '0 32px 32px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 600, fontSize: 13, letterSpacing: '0.1em', color: ACCENT, textTransform: 'uppercase' }}>{proj.name}</span>
-          <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 600, fontSize: 'clamp(20px,2.4vw,26px)', lineHeight: 1.3, color: '#fff', maxWidth: 560 }}>{proj.headline}</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: 48, flexWrap: 'wrap' }}>
-          {proj.stats.map((s, si) => (
-            <div key={si} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-                <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 24, color: '#fff' }}>{s.before}</span>
-                <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 400, fontSize: 18, color: MUTED }}>→</span>
-                <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 24, color: ACCENT }}>{s.after}</span>
-              </div>
-              <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 500, fontSize: 11, letterSpacing: '0.08em', color: MUTED, textTransform: 'uppercase' }}>{s.label}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 600, fontSize: 11, letterSpacing: '0.08em', color: MUTED, textTransform: 'uppercase' }}>{proj.role}</span>
-          <a href={proj.href} style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 600, fontSize: 13, letterSpacing: '0.04em', color: ACCENT, textDecoration: 'none' }}>Case Study ↗</a>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
 
 function SecHead({ title }: { title: string }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -167,7 +124,7 @@ export default function HomePage() {
             <a href="#/projects" style={{ fontFamily: 'Syne,sans-serif', fontWeight: 500, fontSize: 18, color: '#fff', textDecoration: 'underline' }}>view all</a>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-            {data.featuredProjects.map((p, i) => <ProjectCard key={i} proj={p} i={i} />)}
+            {data.projects.filter(p => p.featured).map((p, i) => <ProjectCard key={p.slug} p={p} i={i} />)}
           </div>
         </div>
       </section>
