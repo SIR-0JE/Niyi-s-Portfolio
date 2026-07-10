@@ -160,6 +160,35 @@ export interface PortfolioContent {
 ───────────────────────────────────────────── */
 const DEFAULT_PROJECTS: Project[] = [
   {
+    slug: 'the-gaffer',
+    type: 'case-study',
+    badge: 'personal',
+    featured: true,
+    name: 'The Gaffer',
+    headline: 'Giving local competitions the fixtures, standings, and fantasy experience that big leagues get — designed to turn scattered matches into an event people follow.',
+    role: 'Founder & Product Designer',
+    year: '2025 – Present',
+    tools: 'Figma',
+    coverImageUrl: '',
+    processImageUrl: '',
+    liveUrl: '',
+    behanceUrl: '',
+    category: 'Grassroots Sports Platform',
+    categoryTag: 'Sports-Tech',
+    stats: [{ val: '300+', label: 'Students onboarded' }, { val: '3 weeks', label: 'Launch timeframe' }],
+    problem: "Local competitions run on scattered WhatsApp messages and word of mouth. There's no single place for fixtures, standings, or results, so hype dies between matches and fans lose track of what's happening. The Gaffer set out to give grassroots competitions the structure and excitement that professional leagues take for granted.",
+    research: "I ran surveys and interviews with organizers and fans to understand what actually drives engagement around a local competition. The insight: fans don't just want scores — they want a reason to keep checking back between matches. That pointed the design toward live standings, player profiles, and a fantasy layer that turns passive viewers into invested participants.",
+    process: [
+      { title: 'Research & prioritization', body: 'Used organizer and fan interviews to decide which features would actually drive repeat visits, not just look good.' },
+      { title: 'Mobile-first design', body: 'Designed the core experience — fixtures, standings, player profiles — around how fans really follow a competition: quickly, on their phones.' },
+      { title: 'Fantasy & hype layer', body: 'Added a fantasy feature engineered to build hype and give fans a reason to return between matches.' },
+      { title: 'Pilot', body: 'Launched with the Bowen Fans League and refined onboarding based on where new users dropped off.' }
+    ],
+    outcomes: [],
+    reflection: 'The Gaffer onboarded 300+ students in 3 weeks for the Bowen Fans League and measurably lifted participation and engagement around the tournament — proof that structure plus a fantasy hook can make a grassroots competition feel like a real league.',
+    sections: { problem: true, research: true, process: true, outcome: false, reflection: true },
+  },
+  {
     slug: 'voterix',
     type: 'case-study',
     badge: 'personal',
