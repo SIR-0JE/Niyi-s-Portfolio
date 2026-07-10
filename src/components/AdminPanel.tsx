@@ -265,9 +265,9 @@ function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => v
       'slug', 'name', 'title', 'type', 'badge', 'featured',
       'role', 'year', 'timeline', 'tools',
       'category', 'category tag', 'cover image url', 'live url', 'behance url',
-      'headline', 'hero summary', 'summary',
+      'headline', 'hero summary', 'summary', 'one-liner',
       'problem', 'challenge', 'the problem',
-      'research', 'process',
+      'research', 'process', 'decision notes',
       'outcome', 'outcomes', 'the outcome', 'results',
       'reflection', 'stats'
     ]
@@ -289,7 +289,7 @@ function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => v
       if (['cover image url'].includes(field)) key = 'coverImageUrl'
       if (['live url'].includes(field)) key = 'liveUrl'
       if (['behance url'].includes(field)) key = 'behanceUrl'
-      if (['headline', 'hero summary', 'summary'].includes(field)) key = 'headline'
+      if (['headline', 'hero summary', 'summary', 'one-liner'].includes(field)) key = 'headline'
       if (['problem', 'challenge', 'the problem'].includes(field)) key = 'problem'
       
       if (key) {
@@ -330,7 +330,7 @@ function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => v
           continue
         }
 
-        if (activeField === 'process' || /^\d+\.\s+/.test(line)) {
+        if (['process', 'decision notes'].includes(activeField || '') || /^\d+\.\s+/.test(line)) {
           const processMatch = line.match(/^\d+\.\s+([^—-]+)[—-]+(.*)$/)
           if (processMatch) {
             currentProcess.push({ title: processMatch[1].trim(), body: processMatch[2].trim() })
@@ -372,7 +372,7 @@ function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => v
     if (type === 'case-study') {
       expectedFields = ['name', 'slug', 'headline', 'role', 'year', 'problem', 'research', 'process', 'outcomes']
     } else if (type === 'landing-page') {
-      expectedFields = ['name', 'slug', 'headline', 'role', 'year', 'liveUrl']
+      expectedFields = ['name', 'slug', 'headline', 'role', 'year', 'liveUrl', 'process']
     } else if (type === 'ui') {
       expectedFields = ['name', 'slug', 'role', 'year', 'tools', 'headline']
     }
@@ -380,6 +380,13 @@ function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => v
     const missing = expectedFields.filter(f => {
       const v = (result as any)[f]
       return Array.isArray(v) ? v.length === 0 : !v
+    }).map(f => {
+      if (f === 'process' && type === 'landing-page') return 'decision notes'
+      if (f === 'headline' && type === 'ui') return 'one-liner'
+      if (f === 'coverImageUrl') return 'cover image url'
+      if (f === 'liveUrl') return 'live url'
+      if (f === 'behanceUrl') return 'behance url'
+      return f
     })
     
     setSummary(`✅ Filled ${filledCount} fields. Missing: ${missing.join(', ') || 'None'}`)
