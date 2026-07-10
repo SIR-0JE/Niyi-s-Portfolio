@@ -131,7 +131,7 @@ function GalleryManager({
         <select 
           value={layout} 
           onChange={e => onChange({ galleryLayout: e.target.value as 'grid' | 'horizontal' })}
-          style={{ ...input, width: 'auto', padding: '6px 12px' }}
+          style={{ ...inp, width: 'auto', padding: '6px 12px' }}
         >
           <option value="grid">Grid (Web UIs)</option>
           <option value="horizontal">Horizontal (App UIs)</option>
