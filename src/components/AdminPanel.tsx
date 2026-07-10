@@ -247,50 +247,110 @@ function ExpertiseEditor() {
   )
 }
 
-interface MagicAIResult { name?: string; headline?: string; role?: string; stats?: { before: string; after: string; label: string }[] }
-function MagicAIBox({ onResult }: { onResult: (data: MagicAIResult) => void }) {
-  const [prompt, setPrompt] = useState('')
-  const [engine, setEngine] = useState<'gemini' | 'gemini-pro' | 'claude'>('gemini')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+function QuickFillParser({ onResult }: { onResult: (data: Partial<Project>) => void }) {
+  const [text, setText] = useState('')
+  const [summary, setSummary] = useState('')
 
-  const handleGenerate = async () => {
-    if (!prompt) return
-    setLoading(true); setError('')
-    try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, engine })
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to generate')
-      onResult(data)
-      setPrompt('')
-    } catch (e: any) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
+  const handleParse = () => {
+    if (!text.trim()) return
+
+    const lines = text.split('\n').map(l => l.trim())
+    const result: Partial<Project> = {}
+    
+    let currentProcess: ProjectProcessStep[] = []
+    
+    const headers = ['slug', 'type', 'badge', 'name', 'title', 'headline', 'summary', 'hero summary', 'role', 'year', 'tools', 'coverimageurl', 'liveurl', 'behanceurl', 'problem', 'challenge', 'the problem', 'research', 'outcome', 'the outcome', 'results', 'reflection', 'process']
+    
+    let activeField: string | null = null
+
+    const handleValue = (field: string, val: string, append = false) => {
+      let key: keyof Project | null = null
+      if (['name', 'title'].includes(field)) key = 'name'
+      if (['headline', 'summary', 'hero summary'].includes(field)) key = 'headline'
+      if (['problem', 'challenge', 'the problem'].includes(field)) key = 'problem'
+      if (['outcome', 'the outcome', 'results', 'reflection'].includes(field)) key = 'reflection'
+      if (['slug', 'type', 'badge', 'role', 'year', 'research'].includes(field)) key = field as any
+      if (field === 'coverimageurl') key = 'coverImageUrl'
+      if (field === 'liveurl') key = 'liveUrl'
+      if (field === 'behanceurl') key = 'behanceUrl'
+
+      if (key) {
+        if (append && result[key]) {
+           (result as any)[key] += '\n' + val
+        } else {
+           (result as any)[key] = val
+        }
+      } else if (field === 'tools') {
+        const cleaned = val.replace(/\[.*\]/, '').trim()
+        if (append && result.tools) result.tools += ', ' + cleaned
+        else result.tools = cleaned
+      }
     }
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      if (!line) continue
+
+      const colonIdx = line.indexOf(':')
+      let handledAsInline = false
+      if (colonIdx !== -1) {
+        const potentialLabel = line.slice(0, colonIdx).trim().toLowerCase()
+        if (headers.includes(potentialLabel)) {
+          const val = line.slice(colonIdx + 1).trim()
+          activeField = potentialLabel
+          if (val) {
+            handleValue(activeField, val)
+            handledAsInline = true
+          }
+        }
+      }
+
+      if (!handledAsInline) {
+        const cleanLine = line.replace(/\(.*\)/, '').trim().toLowerCase()
+        if (headers.includes(cleanLine)) {
+          activeField = cleanLine
+          continue
+        }
+
+        const processMatch = line.match(/^\d+\.\s+([^—-]+)[—-]+(.*)$/)
+        if (processMatch) {
+          currentProcess.push({ title: processMatch[1].trim(), body: processMatch[2].trim() })
+          activeField = 'process'
+          continue
+        }
+
+        if (activeField && activeField !== 'process') {
+          handleValue(activeField, line, true)
+        }
+      }
+    }
+
+    if (currentProcess.length > 0) {
+      result.process = currentProcess
+    }
+
+    const filledCount = Object.keys(result).length
+    const expectedFields = ['name', 'headline', 'role', 'year', 'tools', 'problem', 'research', 'process', 'reflection']
+    const missing = expectedFields.filter(f => !(result as any)[f] || ((result as any)[f] && (result as any)[f].length === 0))
+    
+    setSummary(`✅ Filled ${filledCount} fields. Missing: ${missing.join(', ') || 'None'}`)
+    onResult(result)
   }
 
   return (
     <div style={{ padding: 16, background: 'rgba(255, 128, 74, 0.05)', border: `1px solid ${T.accentBorder}`, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span>✨</span>
-        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 14, color: T.accent }}>Magic AI Form Filler</span>
-        <select value={engine} onChange={e => setEngine(e.target.value as any)} style={{ marginLeft: 'auto', background: T.surface, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: '4px 8px', fontSize: 12, fontFamily: 'Poppins,sans-serif', outline: 'none' }}>
-          <option value="gemini">Gemini 1.5 Flash (Fast & Free)</option>
-          <option value="gemini-pro">Gemini 1.5 Pro (Smarter & Free)</option>
-          <option value="claude">Claude 3 Haiku</option>
-        </select>
+        <span>⚡</span>
+        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 14, color: T.accent }}>Quick Fill Parser</span>
       </div>
-      <p style={{ margin: 0, fontSize: 12, color: T.muted }}>Paste your messy notes, Slack messages, or raw thoughts below. Claude will parse it and fill out the fields automatically.</p>
-      <Ta value={prompt} onChange={setPrompt} rows={3} placeholder="e.g. I worked on a fintech app called Health4Monii as a UI intern..." />
-      {error && <span style={{ color: T.danger, fontSize: 12 }}>{error}</span>}
-      <button onClick={handleGenerate} disabled={loading || !prompt} style={{ background: T.accent, color: T.bg, border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: 'Poppins,sans-serif', cursor: loading || !prompt ? 'not-allowed' : 'pointer', alignSelf: 'flex-start', opacity: loading || !prompt ? 0.5 : 1 }}>
-        {loading ? `⟳ ${engine.startsWith('gemini') ? 'Gemini' : 'Claude'} is thinking...` : '✨ Auto-Fill Fields'}
+      <p style={{ margin: 0, fontSize: 12, color: T.muted }}>Paste project text to auto-fill. Matches labels like 'Role:', 'Problem:', 'Research:'. Parses numbered lists (e.g. "1. Title — body") into Process steps.</p>
+      <Ta value={text} onChange={setText} rows={4} placeholder="Paste project text here..." />
+      
+      <button onClick={handleParse} disabled={!text} style={{ background: T.accent, color: T.bg, border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: 'Poppins,sans-serif', cursor: !text ? 'not-allowed' : 'pointer', alignSelf: 'flex-start', opacity: !text ? 0.5 : 1 }}>
+        Parse & Fill Fields
       </button>
+      
+      {summary && <span style={{ color: T.success, fontSize: 13, marginTop: 4, fontFamily: 'Poppins,sans-serif' }}>{summary}</span>}
     </div>
   )
 }
@@ -490,12 +550,7 @@ function ProjectsEditor() {
       {/* META */}
       {subTab === 'meta' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <MagicAIBox onResult={d => upd(active, {
-            name: d.name ?? p.name,
-            headline: d.headline ?? p.headline,
-            role: d.role ?? p.role,
-            stats: d.stats?.length ? d.stats.map(s => ({ val: `${s.before} → ${s.after}`, label: s.label })) : p.stats,
-          })} />
+          <QuickFillParser onResult={d => upd(active, d)} />
           <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <Field label="URL slug (no spaces)"><Inp value={p.slug} onChange={v => upd(active, { slug: v })} /></Field>
