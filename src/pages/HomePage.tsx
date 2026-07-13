@@ -85,9 +85,12 @@ export default function HomePage() {
 
           {/* Stats Section */}
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.85 }}
-            style={{ display: 'flex', flexDirection: 'row', gap: 0, flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 40 }}>
+            style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', rowGap: 24, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 40 }}>
             {h.stats.map((s, i) => (
-              <div key={i} style={{ flex: '1 1 160px', display: 'flex', flexDirection: 'column', gap: 8, padding: i === 0 ? '0 32px 0 0' : '0 32px', borderLeft: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.1)' }}>
+              // Left dividers only at md+ — on mobile these wrap to multiple rows, and a
+              // border-left keyed to array order (not visual row position) would land as a
+              // stray line at the start of a wrapped row, so it's dropped below md.
+              <div key={i} className={i === 0 ? undefined : 'md:border-l md:border-white/10'} style={{ flex: '1 1 160px', display: 'flex', flexDirection: 'column', gap: 8, padding: i === 0 ? '0 32px 0 0' : '0 32px' }}>
                 <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 36, color: '#fff' }}>{s.value}</span>
                 <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 400, fontSize: 13, color: MUTED }}>{s.label}</span>
               </div>

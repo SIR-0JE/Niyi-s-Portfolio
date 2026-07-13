@@ -37,9 +37,9 @@ function Inp({ value, onChange, placeholder, type = 'text' }: { value: string; o
 function Ta({ value, onChange, rows = 3, placeholder }: { value: string; onChange: (v: string) => void; rows?: number; placeholder?: string }) {
   return <textarea value={value} onChange={e => onChange(e.target.value)} rows={rows} placeholder={placeholder} style={ta} />
 }
-function Btn({ children, onClick, color = T.accent, textColor = '#000', style: s }: { children: React.ReactNode; onClick?: () => void; color?: string; textColor?: string; style?: React.CSSProperties }) {
+function Btn({ children, onClick, color = T.accent, textColor = '#000', style: s, className }: { children: React.ReactNode; onClick?: () => void; color?: string; textColor?: string; style?: React.CSSProperties; className?: string }) {
   return (
-    <button onClick={onClick} style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase', background: color, color: textColor, border: 'none', borderRadius: 100, padding: '10px 20px', cursor: 'pointer', whiteSpace: 'nowrap', ...s }}>
+    <button onClick={onClick} className={className} style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase', background: color, color: textColor, border: 'none', borderRadius: 100, padding: '10px 20px', cursor: 'pointer', whiteSpace: 'nowrap', ...s }}>
       {children}
     </button>
   )
@@ -771,6 +771,7 @@ export default function AdminPanel() {
 
   /* Tab */
   const [tab, setTab] = useState<TabKey>('hero')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const { syncStatus, pushToCloud } = usePortfolio()
 
   /* Sync status display helpers */
@@ -811,36 +812,52 @@ export default function AdminPanel() {
     <div style={{ minHeight: '100vh', background: T.bg, display: 'flex', flexDirection: 'column', fontFamily: 'Poppins,sans-serif' }}>
 
       {/* Header bar */}
-      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 60, background: T.surface, borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', padding: '0 24px', gap: 20 }}>
-        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 16, color: T.text }}>🎨 Portfolio Admin</span>
-        <div style={{ flex: 1 }} />
+      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 60, background: T.surface, borderBottom: `1px solid ${T.border}`, display: 'flex', alignItems: 'center', padding: '0 12px', overflow: 'hidden' }} className="md:px-6">
+        <button onClick={() => setSidebarOpen(o => !o)} className="md:hidden" aria-label="Toggle menu" style={{ background: 'none', border: 'none', color: T.text, fontSize: 20, cursor: 'pointer', padding: '4px 8px', flexShrink: 0 }}>☰</button>
+        <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 800, fontSize: 15, color: T.text, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 4 }}>
+          🎨 <span className="hidden md:inline">Portfolio Admin</span><span className="md:hidden">Admin</span>
+        </span>
+        <div className="hidden md:block" style={{ flex: 1 }} />
+        <div style={{ flex: 1 }} className="md:hidden" />
         {/* Sync status & Push Button */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           <span style={{ fontSize: 12, color: syncColor, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: syncColor, display: 'inline-block', animation: syncStatus === 'saving' ? 'pulse 1s infinite' : 'none' }} />
-            {syncLabel}
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: syncColor, display: 'inline-block', animation: syncStatus === 'saving' ? 'pulse 1s infinite' : 'none', flexShrink: 0 }} />
+            <span className="hidden md:inline">{syncLabel}</span>
           </span>
           {syncStatus === 'unsaved' && (
-            <button onClick={pushToCloud} style={{ background: T.accent, color: T.bg, border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, fontFamily: 'Poppins,sans-serif', cursor: 'pointer' }}>
-              Push to Live Site
+            <button onClick={pushToCloud} style={{ background: T.accent, color: T.bg, border: 'none', padding: '6px 10px', borderRadius: 8, fontSize: 12, fontWeight: 600, fontFamily: 'Poppins,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              <span className="hidden md:inline">Push to Live Site</span><span className="md:hidden">Push</span>
             </button>
           )}
         </div>
-        <Btn onClick={() => { window.location.hash = '' }} color="rgba(255,255,255,0.06)" textColor={T.text}>View Site →</Btn>
-        <Btn onClick={() => { sessionStorage.removeItem('admin_v2'); setAuthed(false) }} color="rgba(239,68,68,0.15)" textColor={T.danger}>Log out</Btn>
+        <div className="hidden md:flex" style={{ alignItems: 'center', gap: 12, marginLeft: 12 }}>
+          <Btn onClick={() => { window.location.hash = '' }} color="rgba(255,255,255,0.06)" textColor={T.text}>View Site →</Btn>
+          <Btn onClick={() => { sessionStorage.removeItem('admin_v2'); setAuthed(false) }} color="rgba(239,68,68,0.15)" textColor={T.danger}>Log out</Btn>
+        </div>
       </header>
 
       {/* Body */}
       <div style={{ display: 'flex', marginTop: 60, flex: 1 }}>
-        {/* Sidebar */}
-        <aside style={{ width: 220, background: T.surface, borderRight: `1px solid ${T.border}`, position: 'fixed', top: 60, bottom: 0, overflowY: 'auto', padding: '20px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* Mobile backdrop */}
+        {sidebarOpen && (
+          <div className="md:hidden" onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, top: 60, background: 'rgba(0,0,0,0.6)', zIndex: 90 }} />
+        )}
+
+        {/* Sidebar — off-canvas drawer on mobile, static column on desktop */}
+        <aside className="md:!translate-x-0" style={{ width: 240, background: T.surface, borderRight: `1px solid ${T.border}`, position: 'fixed', top: 60, bottom: 0, left: 0, overflowY: 'auto', padding: '20px 12px', display: 'flex', flexDirection: 'column', gap: 4, zIndex: 95, transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 0.25s ease' }}>
           <span style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 600, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.muted, padding: '4px 12px', marginBottom: 8 }}>Sections</span>
           {TABS.map(t => (
-            <button key={t.key} onClick={() => setTab(t.key)}
+            <button key={t.key} onClick={() => { setTab(t.key); setSidebarOpen(false) }}
               style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, background: tab === t.key ? T.accentFaint : 'transparent', border: tab === t.key ? `1px solid ${T.accentBorder}` : '1px solid transparent', color: tab === t.key ? T.accent : T.muted, fontFamily: 'Poppins,sans-serif', fontWeight: tab === t.key ? 600 : 400, fontSize: 13, cursor: 'pointer', textAlign: 'left', width: '100%' }}>
               <span>{t.icon}</span>{t.label}
             </button>
           ))}
+          {/* Mobile-only: actions that live in the header on desktop */}
+          <div className="md:hidden" style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 16, marginTop: 8, borderTop: `1px solid ${T.border}` }}>
+            <Btn onClick={() => { window.location.hash = '' }} color="rgba(255,255,255,0.06)" textColor={T.text}>View Site →</Btn>
+            <Btn onClick={() => { sessionStorage.removeItem('admin_v2'); setAuthed(false) }} color="rgba(239,68,68,0.15)" textColor={T.danger}>Log out</Btn>
+          </div>
           <div style={{ marginTop: 'auto', paddingTop: 20, borderTop: `1px solid ${T.border}` }}>
             <button onClick={() => { if (window.confirm('Reset ALL content to defaults?')) { reset() } }}
               style={{ background: 'none', border: 'none', color: T.danger, fontSize: 12, cursor: 'pointer', fontFamily: 'Poppins,sans-serif', padding: '8px 14px' }}>
@@ -850,7 +867,7 @@ export default function AdminPanel() {
         </aside>
 
         {/* Main panel */}
-        <main style={{ marginLeft: 220, flex: 1, padding: '32px 40px', overflowY: 'auto', maxWidth: 900 }}>
+        <main className="ml-0 md:ml-[240px] px-4 py-6 md:px-10 md:py-8" style={{ flex: 1, overflowY: 'auto', maxWidth: 900, boxSizing: 'border-box', width: '100%' }}>
           {tab === 'navbar'       && <NavbarEditor />}
           {tab === 'hero'        && <HeroEditor />}
           {tab === 'expertise'   && <ExpertiseEditor />}
