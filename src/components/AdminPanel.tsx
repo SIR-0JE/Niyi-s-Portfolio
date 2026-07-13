@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { usePortfolio, PROJECT_TYPE_LABELS, DEFAULT_SECTIONS_BY_TYPE, emptyProject } from '../context/PortfolioContext'
 import type {
   HeroContent, ExpertiseCard,
   FAQItem, TestimonialItem, ExperienceItem, Project, ProjectType, ProjectBadge, ProjectStat, ProjectProcessStep
 } from '../context/PortfolioContext'
 import { uploadImage } from '../lib/supabase'
+import { getVisitorStats, getMostViewedPaths, getRecentVisitors, getVisitorPageViews } from '../lib/analytics'
+import type { Visitor, VisitorStats, PathViews } from '../lib/analytics'
 
 /* ── Design tokens ── */
 const T = {
@@ -739,10 +741,142 @@ function ProjectsEditor() {
   )
 }
 
+function pathLabel(path: string, projects: Project[]): string {
+  if (path === '#/' || path === '') return 'Home'
+  if (path === '#/about') return 'About'
+  if (path === '#/projects') return 'Projects (grid)'
+  if (path === '#/contact') return 'Contact'
+  if (path === '#/admin') return 'Admin'
+  const m = path.match(/^#\/project\/(.+)$/)
+  if (m) {
+    const proj = projects.find(p => p.slug === m[1])
+    return proj ? `Project: ${proj.name || proj.slug}` : `Project: ${m[1]} (deleted)`
+  }
+  return path
+}
+
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime()
+  const mins = Math.round(diffMs / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.round(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.round(hours / 24)
+  return `${days}d ago`
+}
+
+function StatCard({ value, label }: { value: string | number; label: string }) {
+  return (
+    <div style={{ ...card, flex: '1 1 160px' }}>
+      <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 32, color: T.accent }}>{value}</div>
+      <div style={{ fontFamily: 'Poppins,sans-serif', fontSize: 12, color: T.muted, marginTop: 4 }}>{label}</div>
+    </div>
+  )
+}
+
+function AnalyticsPanel() {
+  const { data } = usePortfolio()
+  const [stats, setStats] = useState<VisitorStats | null>(null)
+  const [paths, setPaths] = useState<PathViews[]>([])
+  const [visitors, setVisitors] = useState<Visitor[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [timeline, setTimeline] = useState<{ path: string; viewed_at: string }[]>([])
+  const [timelineLoading, setTimelineLoading] = useState(false)
+
+  const load = () => {
+    setLoading(true)
+    Promise.all([getVisitorStats(), getMostViewedPaths(), getRecentVisitors()]).then(([s, p, v]) => {
+      setStats(s); setPaths(p); setVisitors(v); setLoading(false)
+    })
+  }
+
+  useEffect(() => { load() }, [])
+
+  const toggleExpand = (sessionId: string) => {
+    if (expanded === sessionId) { setExpanded(null); return }
+    setExpanded(sessionId)
+    setTimelineLoading(true)
+    getVisitorPageViews(sessionId).then(t => { setTimeline(t); setTimelineLoading(false) })
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <SecHead title="Analytics" sub="Anonymous visit tracking — no names, no IP addresses, just an anonymous per-browser id so returning visitors can be recognized." />
+        <Btn onClick={load} style={{ marginLeft: 'auto' }}>↻ Refresh</Btn>
+      </div>
+
+      {loading ? (
+        <div style={{ ...card, color: T.muted, fontSize: 13 }}>Loading…</div>
+      ) : !stats ? (
+        <div style={{ ...card, color: T.muted, fontSize: 13, lineHeight: 1.6 }}>
+          No data yet. Make sure you've run <code>supabase/analytics_schema.sql</code> in your Supabase project's SQL editor, and that Supabase env vars are set.
+        </div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <StatCard value={stats.totalVisitors} label="Unique visitors" />
+            <StatCard value={stats.returningVisitors} label="Returning visitors" />
+            <StatCard value={stats.newToday} label="New today" />
+            <StatCard value={stats.totalVisits} label="Total visits" />
+          </div>
+
+          <SecHead title="Most Viewed" />
+          <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {paths.length === 0 && <span style={{ color: T.muted, fontSize: 13 }}>No page views recorded yet.</span>}
+            {paths.map((p, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '6px 0', borderBottom: i < paths.length - 1 ? `1px solid ${T.border}` : 'none' }}>
+                <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: 13, color: T.text }}>{pathLabel(p.path, data.projects)}</span>
+                <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 13, color: T.accent }}>{p.views}</span>
+              </div>
+            ))}
+          </div>
+
+          <SecHead title="Recent Visitors" sub="Click a visitor to see exactly what they looked at, in order." />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {visitors.length === 0 && <div style={{ ...card, color: T.muted, fontSize: 13 }}>No visitors recorded yet.</div>}
+            {visitors.map(v => (
+              <div key={v.session_id} style={card}>
+                <div onClick={() => toggleExpand(v.session_id)} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }}>
+                  <span style={{ fontFamily: 'monospace', fontSize: 12, color: T.muted }}>{v.session_id.slice(0, 8)}…</span>
+                  {v.visit_count > 1 && (
+                    <span style={{ fontSize: 11, fontFamily: 'Poppins,sans-serif', fontWeight: 600, color: T.success, border: '1px solid rgba(34,197,94,0.3)', borderRadius: 100, padding: '2px 10px' }}>Returning · {v.visit_count} visits</span>
+                  )}
+                  <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: 12, color: T.muted }}>First seen {timeAgo(v.first_seen)}</span>
+                  <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: 12, color: T.muted }}>Last seen {timeAgo(v.last_seen)}</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 12, color: T.accent }}>{expanded === v.session_id ? '▲ Hide' : '▼ What did they check?'}</span>
+                </div>
+                {expanded === v.session_id && (
+                  <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {timelineLoading ? (
+                      <span style={{ color: T.muted, fontSize: 13 }}>Loading…</span>
+                    ) : timeline.length === 0 ? (
+                      <span style={{ color: T.muted, fontSize: 13 }}>No page views recorded for this visitor.</span>
+                    ) : (
+                      timeline.map((t, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13 }}>
+                          <span style={{ color: T.text }}>{i + 1}. {pathLabel(t.path, data.projects)}</span>
+                          <span style={{ color: T.muted }}>{timeAgo(t.viewed_at)}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 /* ─────────────────────────────────────────────
    SIDEBAR TABS CONFIG
 ───────────────────────────────────────────── */
-type TabKey = 'navbar' | 'hero' | 'expertise' | 'projects' | 'testimonials' | 'faq' | 'footer' | 'about'
+type TabKey = 'navbar' | 'hero' | 'expertise' | 'projects' | 'testimonials' | 'faq' | 'footer' | 'about' | 'analytics'
 const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'navbar',       label: 'Navbar',          icon: '⚓' },
   { key: 'hero',        label: 'Hero',             icon: '🏠' },
@@ -752,6 +886,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'faq',         label: 'FAQ',              icon: '❓' },
   { key: 'footer',      label: 'Footer',           icon: '🔗' },
   { key: 'about',       label: 'About + Exp.',     icon: '👤' },
+  { key: 'analytics',   label: 'Analytics',        icon: '📊' },
 ]
 
 /* ─────────────────────────────────────────────
@@ -876,6 +1011,7 @@ export default function AdminPanel() {
           {tab === 'faq'         && <FAQEditor />}
           {tab === 'footer'      && <FooterEditor />}
           {tab === 'about'       && <AboutEditor />}
+          {tab === 'analytics'   && <AnalyticsPanel />}
         </main>
       </div>
     </div>

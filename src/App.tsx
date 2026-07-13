@@ -7,6 +7,7 @@ import AboutPage from './pages/AboutPage'
 import ProjectsPage from './pages/ProjectsPage'
 import ContactPage from './pages/ContactPage'
 import ProjectDetail from './pages/ProjectDetail'
+import { trackVisit, trackPageView } from './lib/analytics'
 
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 
@@ -104,7 +105,13 @@ function MainContent() {
     return () => window.removeEventListener('hashchange', onChange)
   }, [])
 
+  // Anonymous visit tracking — registers this browser once per app load.
+  useEffect(() => { trackVisit() }, [])
+
   const isAdmin = route === '#/admin'
+
+  // Log each page/project viewed, skipping the admin route itself.
+  useEffect(() => { if (!isAdmin) trackPageView(route) }, [route, isAdmin])
 
   const renderPage = () => {
     if (isAdmin)                return <AdminPanel />
