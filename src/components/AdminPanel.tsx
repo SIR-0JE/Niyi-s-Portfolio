@@ -7,6 +7,8 @@ import type {
 import { uploadImage } from '../lib/supabase'
 import { getVisitorStats, getMostViewedPaths, getRecentVisitors, getVisitorPageViews, hoursAgo, daysAgo } from '../lib/analytics'
 import type { Visitor, VisitorStats, PathViews } from '../lib/analytics'
+import { getMessages, markMessageRead, deleteMessage } from '../lib/messages'
+import type { ContactMessage } from '../lib/messages'
 
 /* ── Design tokens ── */
 const T = {
@@ -923,10 +925,78 @@ function AnalyticsPanel() {
   )
 }
 
+function MessagesPanel({ onChange }: { onChange: () => void }) {
+  const [messages, setMessages] = useState<ContactMessage[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState<number | null>(null)
+
+  const load = () => { setLoading(true); getMessages().then(m => { setMessages(m); setLoading(false) }) }
+  useEffect(() => { load() }, [])
+
+  const openMessage = async (m: ContactMessage) => {
+    setExpanded(expanded === m.id ? null : m.id)
+    if (!m.read) {
+      await markMessageRead(m.id)
+      setMessages(prev => prev.map(x => x.id === m.id ? { ...x, read: true } : x))
+      onChange()
+    }
+  }
+
+  const remove = async (id: number) => {
+    if (!window.confirm('Delete this message?')) return
+    await deleteMessage(id)
+    setMessages(prev => prev.filter(m => m.id !== id))
+    onChange()
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <SecHead title="Messages" sub="Every contact form submission, mirrored here in addition to the Web3Forms email notification." />
+        <Btn onClick={load} style={{ marginLeft: 'auto' }}>↻ Refresh</Btn>
+      </div>
+
+      {loading ? (
+        <div style={{ ...card, color: T.muted, fontSize: 13 }}>Loading…</div>
+      ) : messages.length === 0 ? (
+        <div style={{ ...card, color: T.muted, fontSize: 13, lineHeight: 1.6 }}>
+          No messages yet. Make sure you've run <code>supabase/contact_messages_schema.sql</code> in your Supabase project's SQL editor.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {messages.map(m => (
+            <div key={m.id} style={{ ...card, borderColor: !m.read ? T.accentBorder : T.border }}>
+              <div onClick={() => openMessage(m)} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }}>
+                {!m.read && <span style={{ width: 8, height: 8, borderRadius: '50%', background: T.accent, flexShrink: 0 }} />}
+                <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: m.read ? 500 : 700, fontSize: 14, color: T.text }}>{m.name}</span>
+                <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: 12, color: T.muted }}>{m.email}</span>
+                <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: 12, color: T.muted, marginLeft: 'auto' }}>{timeAgo(m.created_at)}</span>
+                <span style={{ fontSize: 12, color: T.accent }}>{expanded === m.id ? '▲' : '▼'}</span>
+              </div>
+              {expanded !== m.id && (
+                <p style={{ margin: '10px 0 0', fontFamily: 'Poppins,sans-serif', fontSize: 13, color: T.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.message}</p>
+              )}
+              {expanded === m.id && (
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <p style={{ margin: 0, fontFamily: 'Poppins,sans-serif', fontSize: 14, color: T.text, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{m.message}</p>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <Btn onClick={() => { window.location.href = `mailto:${m.email}` }} style={{ padding: '8px 16px' }}>Reply by Email</Btn>
+                    <Ghost onClick={() => remove(m.id)}>Delete</Ghost>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ─────────────────────────────────────────────
    SIDEBAR TABS CONFIG
 ───────────────────────────────────────────── */
-type TabKey = 'navbar' | 'hero' | 'expertise' | 'projects' | 'testimonials' | 'faq' | 'footer' | 'about' | 'analytics'
+type TabKey = 'navbar' | 'hero' | 'expertise' | 'projects' | 'testimonials' | 'faq' | 'footer' | 'about' | 'analytics' | 'messages'
 const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'navbar',       label: 'Navbar',          icon: '⚓' },
   { key: 'hero',        label: 'Hero',             icon: '🏠' },
@@ -937,6 +1007,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'footer',      label: 'Footer',           icon: '🔗' },
   { key: 'about',       label: 'About + Exp.',     icon: '👤' },
   { key: 'analytics',   label: 'Analytics',        icon: '📊' },
+  { key: 'messages',    label: 'Messages',         icon: '📩' },
 ]
 
 /* ─────────────────────────────────────────────
@@ -958,6 +1029,11 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<TabKey>('hero')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { syncStatus, pushToCloud } = usePortfolio()
+
+  /* Unread message badge, shown in the sidebar regardless of which tab is active */
+  const [unreadMsgs, setUnreadMsgs] = useState(0)
+  const refreshUnread = () => getMessages().then(msgs => setUnreadMsgs(msgs.filter(m => !m.read).length))
+  useEffect(() => { if (authed) refreshUnread() }, [authed])
 
   /* Sync status display helpers */
   const syncLabel = syncStatus === 'saving' ? '⟳ Syncing to cloud…'
@@ -1036,6 +1112,9 @@ export default function AdminPanel() {
             <button key={t.key} onClick={() => { setTab(t.key); setSidebarOpen(false) }}
               style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, background: tab === t.key ? T.accentFaint : 'transparent', border: tab === t.key ? `1px solid ${T.accentBorder}` : '1px solid transparent', color: tab === t.key ? T.accent : T.muted, fontFamily: 'Poppins,sans-serif', fontWeight: tab === t.key ? 600 : 400, fontSize: 13, cursor: 'pointer', textAlign: 'left', width: '100%' }}>
               <span>{t.icon}</span>{t.label}
+              {t.key === 'messages' && unreadMsgs > 0 && (
+                <span style={{ marginLeft: 'auto', background: T.accent, color: T.bg, fontSize: 11, fontWeight: 700, borderRadius: 100, padding: '1px 7px' }}>{unreadMsgs}</span>
+              )}
             </button>
           ))}
           {/* Mobile-only: actions that live in the header on desktop */}
@@ -1062,6 +1141,7 @@ export default function AdminPanel() {
           {tab === 'footer'      && <FooterEditor />}
           {tab === 'about'       && <AboutEditor />}
           {tab === 'analytics'   && <AnalyticsPanel />}
+          {tab === 'messages'    && <MessagesPanel onChange={refreshUnread} />}
         </main>
       </div>
     </div>

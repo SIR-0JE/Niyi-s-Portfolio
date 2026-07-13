@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Footer from '../components/Footer'
+import { submitMessage } from '../lib/messages'
 
 const A = 'rgb(255,128,74)'
 const M = 'rgb(203,203,203)'
@@ -33,6 +34,10 @@ export default function ContactPage() {
     setErrorMsg('')
     try {
       const formData = new FormData(form)
+      const name = String(formData.get('name') || '')
+      const email = String(formData.get('email') || '')
+      const message = String(formData.get('message') || '')
+      submitMessage(name, email, message) // best-effort mirror into Admin → Messages, doesn't block the send below
       formData.append('access_key', key)
       formData.append('subject', 'New message from portfolio contact form')
       const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: formData })
