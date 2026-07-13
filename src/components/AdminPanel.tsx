@@ -5,7 +5,7 @@ import type {
   FAQItem, TestimonialItem, ExperienceItem, Project, ProjectType, ProjectBadge, ProjectStat, ProjectProcessStep
 } from '../context/PortfolioContext'
 import { uploadImage } from '../lib/supabase'
-import { getVisitorStats, getMostViewedPaths, getRecentVisitors, getVisitorPageViews } from '../lib/analytics'
+import { getVisitorStats, getMostViewedPaths, getRecentVisitors, getVisitorPageViews, hoursAgo, daysAgo } from '../lib/analytics'
 import type { Visitor, VisitorStats, PathViews } from '../lib/analytics'
 
 /* ── Design tokens ── */
@@ -766,17 +766,34 @@ function timeAgo(iso: string): string {
   return `${days}d ago`
 }
 
-function StatCard({ value, label }: { value: string | number; label: string }) {
+function StatCard({ value, label, highlight }: { value: string | number; label: string; highlight?: boolean }) {
   return (
-    <div style={{ ...card, flex: '1 1 160px' }}>
+    <div style={{ ...card, flex: '1 1 160px', border: highlight ? `1px solid ${T.accentBorder}` : undefined, background: highlight ? T.accentFaint : undefined }}>
       <div style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: 32, color: T.accent }}>{value}</div>
-      <div style={{ fontFamily: 'Poppins,sans-serif', fontSize: 12, color: T.muted, marginTop: 4 }}>{label}</div>
+      <div style={{ fontFamily: 'Poppins,sans-serif', fontSize: 12, color: highlight ? T.accent : T.muted, marginTop: 4 }}>{label}</div>
     </div>
   )
 }
 
+type TimeRange = '24h' | '7d' | '30d' | 'all'
+
+const TIME_RANGE_OPTIONS: { key: TimeRange; label: string }[] = [
+  { key: '24h', label: 'Last 24h' },
+  { key: '7d',  label: 'Last 7 days' },
+  { key: '30d', label: 'Last 30 days' },
+  { key: 'all', label: 'All time' },
+]
+
+function sinceFromRange(range: TimeRange): string | undefined {
+  if (range === '24h') return hoursAgo(24)
+  if (range === '7d')  return daysAgo(7)
+  if (range === '30d') return daysAgo(30)
+  return undefined
+}
+
 function AnalyticsPanel() {
   const { data } = usePortfolio()
+  const [range, setRange] = useState<TimeRange>('24h')
   const [stats, setStats] = useState<VisitorStats | null>(null)
   const [paths, setPaths] = useState<PathViews[]>([])
   const [visitors, setVisitors] = useState<Visitor[]>([])
@@ -785,14 +802,21 @@ function AnalyticsPanel() {
   const [timeline, setTimeline] = useState<{ path: string; viewed_at: string }[]>([])
   const [timelineLoading, setTimelineLoading] = useState(false)
 
-  const load = () => {
+  const load = (r: TimeRange = range) => {
     setLoading(true)
-    Promise.all([getVisitorStats(), getMostViewedPaths(), getRecentVisitors()]).then(([s, p, v]) => {
+    setExpanded(null)
+    const since = sinceFromRange(r)
+    Promise.all([getVisitorStats(since), getMostViewedPaths(20, since), getRecentVisitors(50, since)]).then(([s, p, v]) => {
       setStats(s); setPaths(p); setVisitors(v); setLoading(false)
     })
   }
 
   useEffect(() => { load() }, [])
+
+  const handleRangeChange = (r: TimeRange) => {
+    setRange(r)
+    load(r)
+  }
 
   const toggleExpand = (sessionId: string) => {
     if (expanded === sessionId) { setExpanded(null); return }
@@ -803,9 +827,34 @@ function AnalyticsPanel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
         <SecHead title="Analytics" sub="Anonymous visit tracking — no names, no IP addresses, just an anonymous per-browser id so returning visitors can be recognized." />
-        <Btn onClick={load} style={{ marginLeft: 'auto' }}>↻ Refresh</Btn>
+        <Btn onClick={() => load(range)} style={{ marginLeft: 'auto', alignSelf: 'center' }}>↻ Refresh</Btn>
+      </div>
+
+      {/* Time range selector */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {TIME_RANGE_OPTIONS.map(opt => (
+          <button
+            key={opt.key}
+            onClick={() => handleRangeChange(opt.key)}
+            style={{
+              padding: '6px 14px',
+              borderRadius: 100,
+              border: range === opt.key ? `1px solid ${T.accent}` : `1px solid ${T.border}`,
+              background: range === opt.key ? T.accentFaint : 'transparent',
+              color: range === opt.key ? T.accent : T.muted,
+              fontFamily: 'Poppins,sans-serif',
+              fontSize: 12,
+              fontWeight: range === opt.key ? 600 : 400,
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       {loading ? (
@@ -817,15 +866,16 @@ function AnalyticsPanel() {
       ) : (
         <>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            <StatCard value={stats.totalVisitors} label="Unique visitors" />
+            <StatCard value={stats.totalVisitors} label={range === 'all' ? 'Unique visitors' : `Unique visitors (${TIME_RANGE_OPTIONS.find(o => o.key === range)?.label})`} />
             <StatCard value={stats.returningVisitors} label="Returning visitors" />
+            {range === 'all' && <StatCard value={stats.last24h} label="Active last 24h" highlight />}
             <StatCard value={stats.newToday} label="New today" />
             <StatCard value={stats.totalVisits} label="Total visits" />
           </div>
 
           <SecHead title="Most Viewed" />
           <div style={{ ...card, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {paths.length === 0 && <span style={{ color: T.muted, fontSize: 13 }}>No page views recorded yet.</span>}
+            {paths.length === 0 && <span style={{ color: T.muted, fontSize: 13 }}>No page views recorded in this period.</span>}
             {paths.map((p, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '6px 0', borderBottom: i < paths.length - 1 ? `1px solid ${T.border}` : 'none' }}>
                 <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: 13, color: T.text }}>{pathLabel(p.path, data.projects)}</span>
@@ -836,7 +886,7 @@ function AnalyticsPanel() {
 
           <SecHead title="Recent Visitors" sub="Click a visitor to see exactly what they looked at, in order." />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {visitors.length === 0 && <div style={{ ...card, color: T.muted, fontSize: 13 }}>No visitors recorded yet.</div>}
+            {visitors.length === 0 && <div style={{ ...card, color: T.muted, fontSize: 13 }}>No visitors in this period.</div>}
             {visitors.map(v => (
               <div key={v.session_id} style={card}>
                 <div onClick={() => toggleExpand(v.session_id)} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', cursor: 'pointer' }}>
